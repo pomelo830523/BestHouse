@@ -24,7 +24,7 @@
 ```
 besthouse-frontend/   Angular 15 (standalone components)
 besthouse-backend/    Spring Boot 3.2 + Java 17
-docker-compose.yml    MariaDB 11
+docker-compose.yml    PostgreSQL 16
 ```
 
 ### 後端
@@ -44,9 +44,7 @@ docker-compose.yml    MariaDB 11
 - 純 SCSS，無第三方 UI library
 
 ### 資料庫
-- **MariaDB 11**（via Docker）
-- 欄位命名：`UPPER_SNAKE_CASE`
-- 啟動參數：`--lower-case-table-names=1`（解決 Linux 容器大小寫問題）
+- **PostgreSQL 16**（via Docker）
 
 ## 快速啟動
 
@@ -81,6 +79,58 @@ npm start
 ```
 
 前端位址：`http://localhost:4200`
+
+---
+
+## 手機存取（Tailscale）
+
+使用 [Tailscale](https://tailscale.com) 可以在看房現場用手機操作，安全且免費。
+
+### 原理
+
+Tailscale 在電腦和手機之間建立加密的私人網路（基於 WireGuard VPN）。
+電腦 port 對外部網際網路仍然關閉，只有同帳號的裝置能連線。
+
+### 設定步驟（一次性）
+
+**1. 安裝 Tailscale**
+- 電腦：前往 [tailscale.com/download](https://tailscale.com/download) 下載 Windows 版
+- 手機：App Store / Google Play 搜尋「Tailscale」
+- 兩台裝置用**同一個 Google 帳號**登入
+
+**2. 開放防火牆 Port 4200**
+
+以系統管理員身份執行 PowerShell：
+```powershell
+New-NetFirewallRule -DisplayName "BestHouse" -Direction Inbound -Protocol TCP -LocalPort 4200 -Action Allow -Profile Any
+```
+
+**3. 關閉電腦休眠（看房期間）**
+
+控制台 → 電源選項 → 插電時「永不」休眠
+
+### 每次使用
+
+**電腦端（看房前啟動）：**
+```bash
+# 啟動資料庫
+docker compose up -d
+
+# 啟動後端
+cd besthouse-backend
+mvn spring-boot:run
+
+# 啟動前端（新開終端機）
+cd besthouse-frontend
+npm start
+```
+
+**手機端：**
+1. 打開 Tailscale app，確認電腦旁邊顯示綠點
+2. 查看電腦的 Tailscale IP（在 Tailscale app 裡可以看到，格式：`100.x.x.x`）
+3. 手機瀏覽器開啟：`http://100.x.x.x:4200`
+
+---
 
 ## 資料庫 Schema
 
