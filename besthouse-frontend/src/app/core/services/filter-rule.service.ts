@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { FilterRule } from '../models/filter-rule.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class FilterRuleService {
-  private readonly baseUrl = '/api/filter-rules';
+  private readonly baseUrl = `${environment.apiUrl}/api/filter-rules`;
 
   constructor(private http: HttpClient) {}
 

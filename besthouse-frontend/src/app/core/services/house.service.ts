@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { House, HouseCreateRequest } from '../models/house.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class HouseService {
-  private readonly baseUrl = '/api/houses';
+  private readonly baseUrl = `${environment.apiUrl}/api/houses`;
 
   constructor(private http: HttpClient) {}
 
