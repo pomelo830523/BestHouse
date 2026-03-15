@@ -35,6 +35,7 @@ export interface House {
   parkingPrice: number;
   parkingPing: number;
   monthlyFee: number;
+  listingUrl: string | null;
   note: string;
   hasVisited: boolean;
   discountPercent: number | null;

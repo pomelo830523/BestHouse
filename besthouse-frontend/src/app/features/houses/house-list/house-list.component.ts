@@ -124,6 +124,10 @@ export class HouseListComponent implements OnInit {
     return +((discounted - house.estimatedRegistryPrice) / house.estimatedRegistryPrice * 100).toFixed(1);
   }
 
+  mapsUrl(address: string): string {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+  }
+
   diffClass(pct: number): string {
     if (pct > 0) return 'diff--higher';
     if (pct < 0) return 'diff--lower';

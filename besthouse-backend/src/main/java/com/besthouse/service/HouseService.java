@@ -68,6 +68,7 @@ public class HouseService {
         house.setParkingPrice(dto.getParkingPrice());
         house.setParkingPing(dto.getParkingPing());
         house.setMonthlyFee(dto.getMonthlyFee());
+        house.setListingUrl(dto.getListingUrl());
         house.setNote(dto.getNote());
         house.setHasVisited(dto.getHasVisited() != null ? dto.getHasVisited() : false);
         house.setDiscountPercent(dto.getDiscountPercent());
@@ -136,6 +137,7 @@ public class HouseService {
                 .parkingPrice(house.getParkingPrice())
                 .parkingPing(house.getParkingPing())
                 .monthlyFee(house.getMonthlyFee())
+                .listingUrl(house.getListingUrl())
                 .note(house.getNote())
                 .hasVisited(house.getHasVisited())
                 .discountPercent(house.getDiscountPercent())
@@ -183,6 +185,7 @@ public class HouseService {
                 .parkingPrice(dto.getParkingPrice() != null ? dto.getParkingPrice() : BigDecimal.ZERO)
                 .parkingPing(dto.getParkingPing())
                 .monthlyFee(dto.getMonthlyFee())
+                .listingUrl(dto.getListingUrl())
                 .note(dto.getNote())
                 .hasVisited(dto.getHasVisited() != null ? dto.getHasVisited() : false)
                 .discountPercent(dto.getDiscountPercent())

@@ -31,6 +31,7 @@ public class HouseDto {
     private BigDecimal parkingPrice;
     private BigDecimal parkingPing;
     private BigDecimal monthlyFee;
+    private String listingUrl;
     private String note;
     private Boolean hasVisited;
     private BigDecimal discountPercent;

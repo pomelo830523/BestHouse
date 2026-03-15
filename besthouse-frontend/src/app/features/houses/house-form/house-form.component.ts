@@ -78,6 +78,7 @@ export class HouseFormComponent implements OnInit {
       parkingPrice: [0],
       parkingPing: [null],
       monthlyFee: [null],
+      listingUrl: [''],
       note: [''],
       // 看房評估欄位（tri-state: '' = 未查, 'true' = 是, 'false' = 否）
       hasMoldOrLeak: [''],
@@ -122,6 +123,7 @@ export class HouseFormComponent implements OnInit {
           parkingPrice: house.parkingPrice,
           parkingPing: house.parkingPing,
           monthlyFee: house.monthlyFee,
+          listingUrl: house.listingUrl ?? '',
           note: house.note,
           hasMoldOrLeak: this.toBoolStr(house.hasMoldOrLeak),
           isFloorLevelOk: this.toBoolStr(house.isFloorLevelOk),
@@ -237,6 +239,7 @@ export class HouseFormComponent implements OnInit {
       parkingPrice: raw.parkingPrice || undefined,
       parkingPing: raw.parkingPing || undefined,
       monthlyFee: raw.monthlyFee || undefined,
+      listingUrl: raw.listingUrl || undefined,
       note: raw.note || undefined,
       hasVisited: raw.hasVisited ?? false,
       discountPercent: raw.discountPercent ?? undefined,

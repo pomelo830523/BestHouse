@@ -51,8 +51,20 @@
         </thead>
         <tbody>
           <tr *ngFor="let house of activeHouses">
-            <td class="nickname">{{ house.nickname }}</td>
-            <td class="address">{{ house.address || '-' }}</td>
+            <td class="nickname">
+              <a *ngIf="house.listingUrl; else plainNickname"
+                 [href]="house.listingUrl" target="_blank" rel="noopener" class="listing-link">
+                {{ house.nickname }} ↗
+              </a>
+              <ng-template #plainNickname>{{ house.nickname }}</ng-template>
+            </td>
+            <td class="address">
+              <a *ngIf="house.address; else noAddress"
+                 [href]="mapsUrl(house.address)" target="_blank" rel="noopener" class="maps-link">
+                {{ house.address }}
+              </a>
+              <ng-template #noAddress>-</ng-template>
+            </td>
             <td class="num">{{ house.buildAreaPing ?? '-' }}</td>
             <td class="num">{{ house.indoorPing ?? '-' }}</td>
             <td class="num">{{ house.totalPrice | number:'1.0-0' }}</td>
@@ -104,8 +116,20 @@
         </thead>
         <tbody>
           <tr *ngFor="let house of eliminatedHouses" class="eliminated-row">
-            <td>{{ house.nickname }}</td>
-            <td>{{ house.address || '-' }}</td>
+            <td>
+              <a *ngIf="house.listingUrl; else plainNickname2"
+                 [href]="house.listingUrl" target="_blank" rel="noopener" class="listing-link">
+                {{ house.nickname }} ↗
+              </a>
+              <ng-template #plainNickname2>{{ house.nickname }}</ng-template>
+            </td>
+            <td>
+              <a *ngIf="house.address; else noAddress2"
+                 [href]="mapsUrl(house.address)" target="_blank" rel="noopener" class="maps-link">
+                {{ house.address }}
+              </a>
+              <ng-template #noAddress2>-</ng-template>
+            </td>
             <td class="num">{{ house.totalPrice | number:'1.0-0' }}</td>
             <td class="visited-cell">
               <span class="visited-badge" [class.visited]="house.hasVisited">

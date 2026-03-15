@@ -94,6 +94,19 @@
   color: #bdbdbd;
 }
 
+.listing-link {
+  color: #1a237e;
+  text-decoration: none;
+  font-weight: 600;
+  &:hover { text-decoration: underline; }
+}
+
+.maps-link {
+  color: #424242;
+  text-decoration: none;
+  &:hover { color: #1a237e; text-decoration: underline; }
+}
+
 .diff--higher {
   color: #c62828;
   font-weight: 600;
