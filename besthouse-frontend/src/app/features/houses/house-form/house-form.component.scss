@@ -99,25 +99,6 @@
   }
 }
 
-.visited-group {
-  .toggle {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-
-    input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
-      cursor: pointer;
-    }
-
-    &__label {
-      font-size: 0.875rem;
-      color: #424242;
-    }
-  }
-}
 
 .form-actions {
   display: flex;
