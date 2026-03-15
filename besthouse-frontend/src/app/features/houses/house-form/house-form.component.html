@@ -1,0 +1,317 @@
+<div class="page-header">
+  <h2>{{ isEditMode ? '編輯房屋' : '新增房屋' }}</h2>
+</div>
+
+<div *ngIf="errorMessage" class="alert alert--error">{{ errorMessage }}</div>
+
+<form [formGroup]="form" (ngSubmit)="submit()" class="card house-form">
+
+  <!-- 基本資訊 -->
+  <section class="form-section">
+    <h3 class="form-section__title">基本資訊</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>代號 / 暱稱 *</label>
+        <input formControlName="nickname" placeholder="例：永和A戶" />
+        <span class="error-msg" *ngIf="isInvalid('nickname')">代號不可空白</span>
+      </div>
+      <div class="form-group">
+        <label>社區名稱</label>
+        <input formControlName="communityName" />
+      </div>
+      <div class="form-group form-group--full">
+        <label>地址</label>
+        <input formControlName="address" />
+      </div>
+      <div class="form-group">
+        <label>建商</label>
+        <input formControlName="builder" />
+      </div>
+      <div class="form-group">
+        <label>屋齡（年）</label>
+        <input type="number" formControlName="houseAgeYear" min="0" />
+      </div>
+      <div class="form-group">
+        <label>樓層</label>
+        <input type="number" formControlName="floor" min="1" />
+      </div>
+      <div class="form-group">
+        <label>總樓層</label>
+        <input type="number" formControlName="totalFloor" min="1" />
+      </div>
+    </div>
+  </section>
+
+  <!-- 坪數與格局 -->
+  <section class="form-section">
+    <h3 class="form-section__title">坪數與格局</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>總坪（含公設）</label>
+        <input type="number" formControlName="buildAreaPing" step="0.01" min="0.01" />
+      </div>
+      <div class="form-group">
+        <label>室內坪數</label>
+        <input type="number" formControlName="indoorPing" step="0.01" min="0.01" />
+      </div>
+      <div class="form-group">
+        <label>房</label>
+        <input type="number" formControlName="bedroomCount" min="0" />
+      </div>
+      <div class="form-group">
+        <label>廳</label>
+        <input type="number" formControlName="livingRoomCount" min="0" />
+      </div>
+      <div class="form-group">
+        <label>衛</label>
+        <input type="number" formControlName="bathroomCount" min="0" />
+      </div>
+      <div class="form-group">
+        <label>車位類型</label>
+        <select formControlName="parkingType">
+          <option *ngFor="let pt of parkingTypes" [value]="pt">{{ parkingLabels[pt] }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>車位坪數（坪）</label>
+        <input type="number" formControlName="parkingPing" step="0.01" min="0" />
+      </div>
+    </div>
+  </section>
+
+  <!-- 價格 -->
+  <section class="form-section">
+    <h3 class="form-section__title">價格</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>總價（萬）*</label>
+        <input type="number" formControlName="totalPrice" step="0.1" min="1" />
+        <span class="error-msg" *ngIf="isInvalid('totalPrice')">總價不可為空且須大於 0</span>
+      </div>
+      <div class="form-group">
+        <label>車位價格（萬，0 = 無或不分開計）</label>
+        <input type="number" formControlName="parkingPrice" step="0.1" min="0" />
+      </div>
+      <div class="form-group">
+        <label>管理費（元/月）</label>
+        <input type="number" formControlName="monthlyFee" min="0" />
+      </div>
+    </div>
+
+    <!-- 即時計算單價 -->
+    <div class="price-calc" *ngIf="pricePerPingWithParking !== null">
+      <div class="price-calc__item">
+        <span class="price-calc__label">含車位每坪</span>
+        <span class="price-calc__value">{{ pricePerPingWithParking | number:'1.2-2' }} 萬</span>
+      </div>
+      <div class="price-calc__item">
+        <span class="price-calc__label">不含車位每坪</span>
+        <span class="price-calc__value">
+          {{ pricePerPingWithoutParking !== null ? (pricePerPingWithoutParking | number:'1.2-2') + ' 萬' : '無法計算（坪數不足）' }}
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 看房紀錄 -->
+  <section class="form-section">
+    <h3 class="form-section__title">看房紀錄</h3>
+    <div class="form-grid">
+      <div class="form-group visited-group">
+        <label>已看房</label>
+        <label class="toggle">
+          <input type="checkbox" formControlName="hasVisited" />
+          <span class="toggle__label">{{ form.get('hasVisited')?.value ? '✓ 已看過' : '尚未看房' }}</span>
+        </label>
+      </div>
+      <div class="form-group">
+        <label>屋主折扣（%）</label>
+        <input type="number" formControlName="discountPercent" step="0.1" min="0" max="100"
+               placeholder="例：2.5 表示打 97.5 折" />
+      </div>
+      <div class="form-group">
+        <label>實價登錄估計總價（萬）</label>
+        <input type="number" formControlName="estimatedRegistryPrice" step="0.1" min="0"
+               placeholder="填入實價登錄行情" />
+      </div>
+    </div>
+
+    <!-- 折扣後計算 -->
+    <div class="price-calc price-calc--discount" *ngIf="discountedTotalPrice !== null">
+      <div class="price-calc__header">折扣後（{{ form.get('discountPercent')?.value }}% off）</div>
+      <div class="price-calc__items">
+        <div class="price-calc__item">
+          <span class="price-calc__label">折扣後總價</span>
+          <span class="price-calc__value">{{ discountedTotalPrice | number:'1.2-2' }} 萬</span>
+        </div>
+        <div class="price-calc__item">
+          <span class="price-calc__label">含車位每坪</span>
+          <span class="price-calc__value">{{ discountedPricePerPingWithParking | number:'1.2-2' }} 萬</span>
+        </div>
+        <div class="price-calc__item" *ngIf="discountedPricePerPingWithoutParking !== null">
+          <span class="price-calc__label">不含車位每坪</span>
+          <span class="price-calc__value">{{ discountedPricePerPingWithoutParking | number:'1.2-2' }} 萬</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 實價登錄比較 -->
+    <div class="price-calc price-calc--registry" *ngIf="registryVsOriginalDiffPct !== null">
+      <div class="price-calc__header">實價登錄比較</div>
+      <div class="price-calc__items">
+        <div class="price-calc__item">
+          <span class="price-calc__label">開價 vs 實價登錄</span>
+          <span class="price-calc__value" [ngClass]="diffClass(registryVsOriginalDiffPct)">
+            {{ registryVsOriginalDiffPct > 0 ? '+' : '' }}{{ registryVsOriginalDiffPct }}%
+          </span>
+        </div>
+        <div class="price-calc__item" *ngIf="registryVsDiscountedDiffPct !== null">
+          <span class="price-calc__label">折扣後 vs 實價登錄</span>
+          <span class="price-calc__value" [ngClass]="diffClass(registryVsDiscountedDiffPct)">
+            {{ registryVsDiscountedDiffPct > 0 ? '+' : '' }}{{ registryVsDiscountedDiffPct }}%
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 看房評估（僅編輯模式） -->
+  <section class="form-section" *ngIf="isEditMode">
+    <h3 class="form-section__title">看房評估</h3>
+
+    <h4 class="form-section__subtitle">現場狀況</h4>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>壁癌 / 漏水</label>
+        <select formControlName="hasMoldOrLeak">
+          <option value="">未檢查</option>
+          <option value="false">無</option>
+          <option value="true">有</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>地板平整</label>
+        <select formControlName="isFloorLevelOk">
+          <option value="">未檢查</option>
+          <option value="true">正常</option>
+          <option value="false">有問題</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>門窗開關</label>
+        <select formControlName="isDoorWindowOk">
+          <option value="">未檢查</option>
+          <option value="true">正常</option>
+          <option value="false">有問題</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>水壓</label>
+        <select formControlName="isWaterPressureOk">
+          <option value="">未檢查</option>
+          <option value="true">正常</option>
+          <option value="false">不足</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>電箱容量（A）</label>
+        <input type="number" formControlName="electricCapacity" min="0" placeholder="例：50" />
+      </div>
+    </div>
+
+    <h4 class="form-section__subtitle">安全疑慮</h4>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>兇宅</label>
+        <select formControlName="isHaunted">
+          <option value="">未查</option>
+          <option value="false">否</option>
+          <option value="true">是</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>海砂屋</label>
+        <select formControlName="isSeaSand">
+          <option value="">未查</option>
+          <option value="false">否</option>
+          <option value="true">是</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>輻射屋</label>
+        <select formControlName="isRadiation">
+          <option value="">未查</option>
+          <option value="false">否</option>
+          <option value="true">是</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>違建</label>
+        <select formControlName="hasIllegalConstruction">
+          <option value="">未查</option>
+          <option value="false">無</option>
+          <option value="true">有</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>淹水風險</label>
+        <select formControlName="floodRisk">
+          <option value="">未查</option>
+          <option *ngFor="let r of floodRisks" [value]="r">{{ floodRiskLabels[r] }}</option>
+        </select>
+      </div>
+    </div>
+
+    <h4 class="form-section__subtitle">周邊與管理</h4>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>嫌惡設施</label>
+        <select formControlName="hasNuisanceFacility">
+          <option value="">未查</option>
+          <option value="false">無</option>
+          <option value="true">有</option>
+        </select>
+      </div>
+      <div class="form-group form-group--full">
+        <label>嫌惡設施說明</label>
+        <input formControlName="nuisanceFacilityNote" placeholder="例：200m 內有宮廟" />
+      </div>
+      <div class="form-group">
+        <label>管委會正常運作</label>
+        <select formControlName="isManagementOk">
+          <option value="">未查</option>
+          <option value="true">正常</option>
+          <option value="false">有疑慮</option>
+        </select>
+      </div>
+    </div>
+
+    <h4 class="form-section__subtitle">看房記錄</h4>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>看房日期</label>
+        <input type="date" formControlName="visitDate" />
+      </div>
+      <div class="form-group form-group--full">
+        <label>整體印象</label>
+        <textarea formControlName="visitImpression" rows="3"
+                  placeholder="進門的感受、格局實際感、鄰居印象、特別優缺點..."></textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- 備註 -->
+  <section class="form-section">
+    <h3 class="form-section__title">備註</h3>
+    <div class="form-group">
+      <textarea formControlName="note" rows="3" placeholder="其他觀察、優缺點..."></textarea>
+    </div>
+  </section>
+
+  <div class="form-actions">
+    <button type="button" class="btn btn--outline" (click)="cancel()">取消</button>
+    <button type="submit" class="btn btn--primary" [disabled]="isSubmitting">
+      {{ isSubmitting ? '儲存中...' : '儲存' }}
+    </button>
+  </div>
+</form>

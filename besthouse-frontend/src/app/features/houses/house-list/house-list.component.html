@@ -1,0 +1,130 @@
+<div class="page-header">
+  <h2>房屋列表</h2>
+  <div class="actions">
+    <button class="btn btn--warn btn--sm" (click)="applyFilters()" [disabled]="isLoading">
+      套用篩選條件
+    </button>
+    <a class="btn btn--primary btn--sm" routerLink="/houses/new">+ 新增房屋</a>
+  </div>
+</div>
+
+<div *ngIf="successMessage" class="alert alert--success">{{ successMessage }}</div>
+<div *ngIf="errorMessage" class="alert alert--error">{{ errorMessage }}</div>
+
+<div *ngIf="isLoading" class="loading">載入中...</div>
+
+<ng-container *ngIf="!isLoading">
+
+  <!-- 有效房屋 -->
+  <div class="card" *ngIf="activeHouses.length > 0">
+    <h3 class="section-title">有效房屋（{{ activeHouses.length }} 間）</h3>
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>代號</th>
+            <th>地址</th>
+            <th class="sortable" (click)="sortBy('buildAreaPing')">
+              總坪 <span class="sort-icon">{{ sortIcon('buildAreaPing') }}</span>
+            </th>
+            <th class="sortable" (click)="sortBy('indoorPing')">
+              室內坪 <span class="sort-icon">{{ sortIcon('indoorPing') }}</span>
+            </th>
+            <th class="sortable" (click)="sortBy('totalPrice')">
+              總價（萬）<span class="sort-icon">{{ sortIcon('totalPrice') }}</span>
+            </th>
+            <th class="sortable" (click)="sortBy('pricePerPingWithoutParking')">
+              不含車位單價 <span class="sort-icon">{{ sortIcon('pricePerPingWithoutParking') }}</span>
+            </th>
+            <th class="sortable" (click)="sortBy('houseAgeYear')">
+              屋齡 <span class="sort-icon">{{ sortIcon('houseAgeYear') }}</span>
+            </th>
+            <th class="sortable" (click)="sortBy('floor')">
+              樓層 <span class="sort-icon">{{ sortIcon('floor') }}</span>
+            </th>
+            <th>格局</th>
+            <th>車位</th>
+            <th>看房</th>
+            <th>實價登錄</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let house of activeHouses">
+            <td class="nickname">{{ house.nickname }}</td>
+            <td class="address">{{ house.address || '-' }}</td>
+            <td class="num">{{ house.buildAreaPing ?? '-' }}</td>
+            <td class="num">{{ house.indoorPing ?? '-' }}</td>
+            <td class="num">{{ house.totalPrice | number:'1.0-0' }}</td>
+            <td class="num">{{ house.pricePerPingWithoutParking | number:'1.2-2' }}</td>
+            <td class="num">{{ house.houseAgeYear != null ? house.houseAgeYear + '年' : '-' }}</td>
+            <td class="num">{{ house.floor != null ? house.floor + 'F' : '-' }}</td>
+            <td>{{ house.bedroomCount }}房{{ house.livingRoomCount }}廳{{ house.bathroomCount }}衛</td>
+            <td>{{ parkingLabels[house.parkingType] || '-' }}</td>
+            <td class="visited-cell">
+              <span class="visited-badge" [class.visited]="house.hasVisited">
+                {{ house.hasVisited ? '✓' : '—' }}
+              </span>
+            </td>
+            <td class="num">
+              <ng-container *ngIf="registryDiffPct(house) !== null; else noRegistry">
+                <span [ngClass]="diffClass(registryDiffPct(house)!)">
+                  {{ registryDiffPct(house)! > 0 ? '+' : '' }}{{ registryDiffPct(house) }}%
+                </span>
+              </ng-container>
+              <ng-template #noRegistry>-</ng-template>
+            </td>
+            <td class="row-actions">
+              <a class="btn btn--outline btn--sm" [routerLink]="['/houses', house.houseId, 'rate']">評分</a>
+              <a class="btn btn--outline btn--sm" [routerLink]="['/houses', house.houseId, 'edit']">編輯</a>
+              <button class="btn btn--danger btn--sm" (click)="deleteHouse(house)">刪除</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 已淘汰房屋 -->
+  <div class="card eliminated-card" *ngIf="eliminatedHouses.length > 0">
+    <h3 class="section-title eliminated-title">已淘汰（{{ eliminatedHouses.length }} 間）</h3>
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>代號</th>
+            <th>地址</th>
+            <th class="sortable" (click)="sortBy('totalPrice')">
+              總價（萬）<span class="sort-icon">{{ sortIcon('totalPrice') }}</span>
+            </th>
+            <th>看房</th>
+            <th>淘汰原因</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let house of eliminatedHouses" class="eliminated-row">
+            <td>{{ house.nickname }}</td>
+            <td>{{ house.address || '-' }}</td>
+            <td class="num">{{ house.totalPrice | number:'1.0-0' }}</td>
+            <td class="visited-cell">
+              <span class="visited-badge" [class.visited]="house.hasVisited">
+                {{ house.hasVisited ? '✓' : '—' }}
+              </span>
+            </td>
+            <td class="reason">{{ house.eliminatedReason }}</td>
+            <td class="row-actions">
+              <button class="btn btn--success btn--sm" (click)="restoreHouse(house)">恢復</button>
+              <a class="btn btn--outline btn--sm" [routerLink]="['/houses', house.houseId, 'edit']">編輯</a>
+              <button class="btn btn--danger btn--sm" (click)="deleteHouse(house)">刪除</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="empty" *ngIf="houses.length === 0">
+    尚未新增任何房屋，<a routerLink="/houses/new">點此新增</a>
+  </div>
+</ng-container>

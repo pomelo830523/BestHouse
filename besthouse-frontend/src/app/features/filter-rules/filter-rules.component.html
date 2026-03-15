@@ -1,0 +1,86 @@
+<div class="page-header">
+  <h2>篩選條件設定</h2>
+  <div class="header-actions">
+    <button class="btn btn--warn btn--sm" (click)="applyFilters()">套用所有啟用規則</button>
+    <button class="btn btn--primary btn--sm" (click)="openCreate()">+ 新增規則</button>
+  </div>
+</div>
+
+<div *ngIf="successMessage" class="alert alert--success">{{ successMessage }}</div>
+<div *ngIf="errorMessage" class="alert alert--error">{{ errorMessage }}</div>
+
+<!-- 新增/編輯表單 -->
+<div class="card form-card" *ngIf="showForm">
+  <h3 class="form-title">{{ editingRuleId ? '編輯規則' : '新增規則' }}</h3>
+  <form [formGroup]="form" (ngSubmit)="submitForm()">
+    <div class="form-grid">
+      <div class="form-group form-group--full">
+        <label>規則名稱 *</label>
+        <input formControlName="ruleName" placeholder="例：總價不超過 3000 萬" />
+      </div>
+      <div class="form-group">
+        <label>規則類型 *</label>
+        <select formControlName="ruleType">
+          <option *ngFor="let rt of ruleTypes" [value]="rt">{{ ruleTypeLabels[rt] }}</option>
+        </select>
+      </div>
+      <div class="form-group" *ngIf="isNumType()">
+        <label>數值</label>
+        <input type="number" formControlName="numValue" step="0.01" />
+      </div>
+      <div class="form-group" *ngIf="!isNumType()">
+        <label>排除車位類型（多選以逗號分隔）</label>
+        <select formControlName="strValue">
+          <option *ngFor="let pt of parkingTypes" [value]="pt">{{ parkingLabels[pt] }}</option>
+        </select>
+        <span class="hint">目前只能單選；如需多個請新增多條規則</span>
+      </div>
+      <div class="form-group">
+        <label>狀態</label>
+        <select formControlName="isActive">
+          <option [ngValue]="true">啟用</option>
+          <option [ngValue]="false">停用</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn--outline" (click)="cancelForm()">取消</button>
+      <button type="submit" class="btn btn--primary" [disabled]="isSubmitting">儲存</button>
+    </div>
+  </form>
+</div>
+
+<!-- 規則清單 -->
+<div class="card">
+  <table class="table" *ngIf="rules.length > 0">
+    <thead>
+      <tr>
+        <th>規則名稱</th>
+        <th>類型</th>
+        <th>條件值</th>
+        <th>狀態</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let rule of rules" [class.inactive-row]="!rule.isActive">
+        <td>{{ rule.ruleName }}</td>
+        <td>{{ ruleTypeLabels[rule.ruleType] }}</td>
+        <td>
+          <span *ngIf="rule.numValue != null">{{ rule.numValue }}</span>
+          <span *ngIf="rule.strValue">{{ rule.strValue }}</span>
+        </td>
+        <td>
+          <span class="badge" [class.badge--active]="rule.isActive" [class.badge--eliminated]="!rule.isActive">
+            {{ rule.isActive ? '啟用' : '停用' }}
+          </span>
+        </td>
+        <td class="row-actions">
+          <button class="btn btn--outline btn--sm" (click)="openEdit(rule)">編輯</button>
+          <button class="btn btn--danger btn--sm" (click)="deleteRule(rule)">刪除</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="empty" *ngIf="rules.length === 0">尚未設定任何篩選規則</div>
+</div>

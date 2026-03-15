@@ -1,0 +1,77 @@
+<div class="page-header">
+  <h2>排名總覽</h2>
+  <button class="btn btn--outline btn--sm" (click)="load()" [disabled]="isLoading">重新計算</button>
+</div>
+
+<div *ngIf="errorMessage" class="alert alert--error">{{ errorMessage }}</div>
+<div *ngIf="isLoading" class="loading">計算中...</div>
+
+<ng-container *ngIf="!isLoading">
+
+  <!-- 有效房屋排名 -->
+  <div class="card" *ngIf="ranking.length > 0">
+    <h3 class="section-title">有效房屋加權排名</h3>
+    <div class="table-wrapper">
+      <table class="table ranking-table">
+        <thead>
+          <tr>
+            <th class="rank-col">名次</th>
+            <th>代號</th>
+            <th>地址</th>
+            <th class="score-col">總分</th>
+            <th *ngFor="let name of memberNames" class="member-col">{{ name }}</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let result of ranking" [class.rank-top]="result.rank === 1">
+            <td class="rank-badge">
+              <span class="rank" [class.rank--gold]="result.rank === 1"
+                                 [class.rank--silver]="result.rank === 2"
+                                 [class.rank--bronze]="result.rank === 3">
+                {{ result.rank }}
+              </span>
+            </td>
+            <td class="nickname">{{ result.nickname }}</td>
+            <td class="address">{{ result.address || '-' }}</td>
+            <td class="total-score" [ngClass]="getScoreClass(result.totalScore)">
+              {{ result.totalScore | number:'1.2-2' }}
+            </td>
+            <td *ngFor="let name of memberNames" class="member-score">
+              {{ getMemberScore(result, name) }}
+            </td>
+            <td>
+              <a class="btn btn--outline btn--sm" [routerLink]="['/houses', result.houseId, 'rate']">評分</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="empty card" *ngIf="ranking.length === 0">
+    目前沒有有效房屋可排名，請先 <a routerLink="/houses">新增房屋</a> 並評分。
+  </div>
+
+  <!-- 淘汰房屋 -->
+  <div class="card eliminated-section" *ngIf="eliminatedHouses.length > 0">
+    <h3 class="section-title eliminated-title">已淘汰（不列入排名）</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>代號</th>
+          <th>地址</th>
+          <th>淘汰原因</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let house of eliminatedHouses">
+          <td>{{ house.nickname }}</td>
+          <td>{{ house.address || '-' }}</td>
+          <td class="reason">{{ house.eliminatedReason }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</ng-container>

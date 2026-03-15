@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:11
+    container_name: besthouse-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: besthouse
+      MYSQL_USER: besthouse
+      MYSQL_PASSWORD: besthouse123
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    command: --lower-case-table-names=1
+    ports:
+      - "3306:3306"
+    volumes:
+      - besthouse-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  besthouse-data:

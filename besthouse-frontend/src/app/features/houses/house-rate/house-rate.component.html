@@ -1,0 +1,75 @@
+<div class="page-header">
+  <div>
+    <h2>評分：{{ house?.nickname }}</h2>
+    <p class="subtitle" *ngIf="house?.address">{{ house?.address }}</p>
+  </div>
+  <button class="btn btn--outline btn--sm" (click)="back()">← 返回列表</button>
+</div>
+
+<div *ngIf="errorMessage" class="alert alert--error">{{ errorMessage }}</div>
+<div *ngIf="successMessage" class="alert alert--success">{{ successMessage }}</div>
+
+<div *ngIf="isLoading" class="loading">載入中...</div>
+
+<ng-container *ngIf="!isLoading && house">
+  <form [formGroup]="form" (ngSubmit)="submit()" class="card">
+
+    <div class="table-wrapper">
+      <table class="table rating-table">
+        <thead>
+          <tr>
+            <th class="dim-col">評分維度</th>
+            <th class="weight-col">權重</th>
+            <th *ngFor="let member of members" class="member-col">
+              {{ member.displayName }}
+              <span class="member-weight">({{ member.weight * 100 | number:'1.0-0' }}%)</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let dimension of dimensions">
+            <td class="dim-name">
+              <span>{{ dimension.dimensionName }}</span>
+              <span class="dim-desc">{{ dimension.description }}</span>
+            </td>
+            <td class="dim-weight">{{ dimension.weight * 100 | number:'1.0-0' }}%</td>
+            <td *ngFor="let member of members" class="score-cell">
+              <input
+                type="number"
+                [formControlName]="controlKey(member.memberId, dimension.dimensionId)"
+                min="1"
+                max="10"
+                class="score-input"
+                [class.invalid]="form.get(controlKey(member.memberId, dimension.dimensionId))?.invalid
+                               && form.get(controlKey(member.memberId, dimension.dimensionId))?.touched"
+              />
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="score-summary">
+            <td colspan="2">加權總分（滿分 10 分）</td>
+            <td *ngFor="let member of members" class="member-score">
+              {{ getMemberWeightedScore(member) | number:'1.2-2' }}
+            </td>
+          </tr>
+          <tr class="total-score-row">
+            <td colspan="2">🏆 房屋加權總分</td>
+            <td [attr.colspan]="members.length" class="total-score">
+              {{ getHouseTotalScore() | number:'1.2-2' }}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="form-hint">* 每格填入 1–10 分</div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn--outline" (click)="back()">取消</button>
+      <button type="submit" class="btn btn--primary" [disabled]="isSubmitting">
+        {{ isSubmitting ? '儲存中...' : '儲存評分' }}
+      </button>
+    </div>
+  </form>
+</ng-container>

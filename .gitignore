@@ -1,0 +1,21 @@
+# Maven
+besthouse-backend/target/
+besthouse-backend/*.iml
+
+# Node
+besthouse-frontend/node_modules/
+besthouse-frontend/dist/
+besthouse-frontend/.angular/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

@@ -1,0 +1,97 @@
+.card {
+  margin-bottom: 20px;
+}
+
+.section-title {
+  margin: 0 0 16px;
+  font-size: 1rem;
+  color: #424242;
+}
+
+.eliminated-title {
+  color: #c62828;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.ranking-table {
+  .rank-col { width: 60px; text-align: center; }
+  .score-col { width: 80px; text-align: center; }
+  .member-col { width: 80px; text-align: center; }
+}
+
+.rank-badge {
+  text-align: center;
+}
+
+.rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.875rem;
+  background: #e0e0e0;
+  color: #424242;
+
+  &--gold { background: #ffd600; color: #333; }
+  &--silver { background: #bdbdbd; color: #333; }
+  &--bronze { background: #bf8970; color: #fff; }
+}
+
+.rank-top td {
+  background: #fffde7;
+}
+
+.nickname { font-weight: 600; }
+
+.address {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.total-score {
+  text-align: center;
+  font-weight: 700;
+  font-size: 1rem;
+
+  &.score--high { color: #2e7d32; }
+  &.score--mid { color: #e65100; }
+  &.score--low { color: #c62828; }
+}
+
+.member-score {
+  text-align: center;
+  color: #616161;
+  font-size: 0.85rem;
+}
+
+.reason {
+  color: #c62828;
+  font-size: 0.8rem;
+  max-width: 300px;
+}
+
+.empty {
+  text-align: center;
+  color: #757575;
+  padding: 40px;
+
+  a { color: #1a237e; }
+}
+
+.loading {
+  text-align: center;
+  color: #757575;
+  padding: 40px;
+}
+
+.eliminated-section {
+  opacity: 0.8;
+}

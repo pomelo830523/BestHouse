@@ -1,0 +1,127 @@
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.card {
+  margin-bottom: 20px;
+}
+
+.section-title {
+  margin: 0 0 16px;
+  font-size: 1rem;
+  color: #424242;
+}
+
+.eliminated-title {
+  color: #c62828;
+}
+
+.eliminated-card {
+  opacity: 0.85;
+}
+
+.eliminated-row td {
+  color: #757575;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.nickname {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.address {
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reason {
+  max-width: 240px;
+  color: #c62828;
+  font-size: 0.8rem;
+}
+
+.num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+
+  &:hover {
+    background: #e0e0e0;
+  }
+}
+
+.sort-icon {
+  color: #9e9e9e;
+  font-size: 0.75rem;
+}
+
+.visited-cell {
+  text-align: center;
+}
+
+.visited-badge {
+  color: #bdbdbd;
+  font-weight: 600;
+
+  &.visited {
+    color: #2e7d32;
+  }
+}
+
+.discount-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  background: #fff8e1;
+  color: #e65100;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.no-data {
+  color: #bdbdbd;
+}
+
+.diff--higher {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.diff--lower {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.row-actions {
+  display: flex;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.loading {
+  text-align: center;
+  color: #757575;
+  padding: 40px;
+}
+
+.empty {
+  text-align: center;
+  color: #757575;
+  padding: 40px;
+
+  a {
+    color: #1a237e;
+  }
+}

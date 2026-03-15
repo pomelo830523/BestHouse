@@ -1,0 +1,46 @@
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 20px;
+}
+
+.tip-card {
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px;
+    font-size: 1rem;
+    color: #1a237e;
+    border-bottom: 2px solid #e8eaf6;
+    padding-bottom: 10px;
+  }
+
+  &__icon {
+    font-size: 1.2rem;
+  }
+}
+
+.tip-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.875rem;
+    color: #424242;
+    padding-left: 12px;
+    border-left: 3px solid #e8eaf6;
+
+    strong {
+      color: #212121;
+      font-size: 0.875rem;
+    }
+  }
+}
