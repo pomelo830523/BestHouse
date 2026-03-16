@@ -84,6 +84,7 @@ export interface HouseCreateRequest {
   parkingPing?: number;
   monthlyFee?: number;
   note?: string;
+  listingUrl?: string;
   hasVisited?: boolean;
   discountPercent?: number | null;
   estimatedRegistryPrice?: number | null;

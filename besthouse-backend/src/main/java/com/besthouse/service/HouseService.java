@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -29,6 +30,11 @@ public class HouseService {
                 .stream()
                 .map(this::toDto)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<HouseDto> findByListingUrl(String url) {
+        return houseRepository.findByListingUrl(url).map(this::toDto);
     }
 
     @Transactional(readOnly = true)

@@ -31,6 +31,13 @@ public class HouseController {
         return ResponseEntity.ok(houseService.findById(houseId));
     }
 
+    @GetMapping("/by-url")
+    public ResponseEntity<HouseDto> getByUrl(@RequestParam String url) {
+        return houseService.findByListingUrl(url)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping
     public ResponseEntity<HouseDto> create(@Valid @RequestBody HouseCreateDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(houseService.create(dto));

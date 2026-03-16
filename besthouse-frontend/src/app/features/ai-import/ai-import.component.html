@@ -1,0 +1,143 @@
+<div class="page-header">
+  <h2>AI 截圖匯入</h2>
+</div>
+
+<!-- 上傳區 -->
+<div class="upload-section card" *ngIf="state === 'idle' || state === 'loading'">
+  <div
+    class="drop-zone"
+    [class.drop-zone--over]="isDragOver"
+    [class.drop-zone--loading]="state === 'loading'"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave()"
+    (drop)="onDrop($event)"
+    (click)="fileInput.click()"
+  >
+    <input #fileInput type="file" accept="image/*" hidden (change)="onFileSelected($event)" />
+
+    <ng-container *ngIf="state === 'idle'">
+      <div class="drop-zone__icon">📸</div>
+      <div class="drop-zone__text">拖曳截圖到這裡，或點擊選擇檔案</div>
+      <div class="drop-zone__hint">支援 JPG、PNG，最大 10MB</div>
+    </ng-container>
+
+    <ng-container *ngIf="state === 'loading'">
+      <div class="drop-zone__icon spinner">⏳</div>
+      <div class="drop-zone__text">AI 解析中，請稍候...</div>
+    </ng-container>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert--error">{{ errorMessage }}</div>
+</div>
+
+<!-- 預覽與編輯 -->
+<div *ngIf="state === 'preview' || state === 'saving'" class="preview-layout">
+
+  <!-- 左：截圖預覽 -->
+  <div class="preview-image card">
+    <img [src]="previewImageUrl" alt="截圖預覽" />
+  </div>
+
+  <!-- 右：表單 -->
+  <form [formGroup]="form" (ngSubmit)="save()" class="card preview-form">
+
+    <div *ngIf="errorMessage" class="alert alert--error">{{ errorMessage }}</div>
+
+    <section class="form-section">
+      <h3 class="form-section__title">基本資訊</h3>
+      <div class="form-grid">
+        <div class="form-group form-group--full">
+          <label>代號 / 暱稱 *</label>
+          <input formControlName="nickname" />
+          <span class="error-msg" *ngIf="isInvalid('nickname')">代號不可空白</span>
+        </div>
+        <div class="form-group">
+          <label>社區名稱</label>
+          <input formControlName="communityName" />
+        </div>
+        <div class="form-group form-group--full">
+          <label>地址</label>
+          <input formControlName="address" />
+        </div>
+        <div class="form-group">
+          <label>建商</label>
+          <input formControlName="builder" />
+        </div>
+        <div class="form-group">
+          <label>屋齡（年）</label>
+          <input type="number" formControlName="houseAgeYear" min="0" />
+        </div>
+        <div class="form-group">
+          <label>樓層</label>
+          <input type="number" formControlName="floor" min="1" />
+        </div>
+        <div class="form-group">
+          <label>總樓層</label>
+          <input type="number" formControlName="totalFloor" min="1" />
+        </div>
+        <div class="form-group form-group--full">
+          <label>房源網址</label>
+          <input formControlName="listingUrl" type="url" placeholder="https://..." />
+        </div>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h3 class="form-section__title">坪數與格局</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>總坪（含公設）</label>
+          <input type="number" formControlName="buildAreaPing" step="0.01" min="0.01" />
+        </div>
+        <div class="form-group">
+          <label>室內坪數</label>
+          <input type="number" formControlName="indoorPing" step="0.01" min="0.01" />
+        </div>
+        <div class="form-group">
+          <label>房</label>
+          <input type="number" formControlName="bedroomCount" min="0" />
+        </div>
+        <div class="form-group">
+          <label>廳</label>
+          <input type="number" formControlName="livingRoomCount" min="0" />
+        </div>
+        <div class="form-group">
+          <label>衛</label>
+          <input type="number" formControlName="bathroomCount" min="0" />
+        </div>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h3 class="form-section__title">價格</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>總價（萬）*</label>
+          <input type="number" formControlName="totalPrice" step="0.1" min="0.1" />
+          <span class="error-msg" *ngIf="isInvalid('totalPrice')">請填寫總價</span>
+        </div>
+        <div class="form-group">
+          <label>車位類型</label>
+          <select formControlName="parkingType">
+            <option *ngFor="let pt of parkingTypes" [value]="pt">{{ parkingLabels[pt] }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>車位價格（萬）</label>
+          <input type="number" formControlName="parkingPrice" step="0.1" min="0" />
+        </div>
+        <div class="form-group">
+          <label>管理費（元/月）</label>
+          <input type="number" formControlName="monthlyFee" min="0" />
+        </div>
+      </div>
+    </section>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn--outline" (click)="cancel()">取消</button>
+      <button type="submit" class="btn btn--primary" [disabled]="state === 'saving'">
+        {{ state === 'saving' ? '儲存中...' : '儲存並繼續編輯' }}
+      </button>
+    </div>
+  </form>
+</div>

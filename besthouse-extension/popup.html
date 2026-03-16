@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <title>BestHouse 房屋擷取</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="header">
+    <span class="header__icon">🏠</span>
+    <span class="header__title">BestHouse 擷取</span>
+  </div>
+
+  <!-- 後端位址設定 -->
+  <div class="section">
+    <label class="setting-label">後端位址</label>
+    <div class="setting-row">
+      <input id="input-api-url" type="text" placeholder="http://localhost:8080" />
+      <button id="btn-save-url" class="btn btn--sm">儲存</button>
+    </div>
+    <div id="msg-saved" class="msg msg--success" hidden>已儲存</div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- 狀態訊息 -->
+  <div id="msg-status" class="msg" hidden></div>
+
+  <!-- 截圖張數 -->
+  <div class="section">
+    <label class="setting-label">截圖張數（頁面太長可增加）</label>
+    <div class="shot-count-row">
+      <input id="input-shot-count" type="range" min="1" max="6" value="3" />
+      <span id="shot-count-display">3</span> 張
+    </div>
+  </div>
+
+  <!-- 主要操作按鈕 -->
+  <div id="section-actions" class="actions">
+    <button id="btn-ai-screenshot" class="btn btn--primary btn--full">📸 AI 截圖匯入</button>
+  </div>
+
+  <!-- 截圖縮圖 -->
+  <img id="preview-screenshot" class="screenshot-thumb" hidden />
+
+  <!-- 重複警告 -->
+  <div id="badge-duplicate" class="preview-badge" hidden></div>
+
+  <!-- 擷取結果預覽 -->
+  <div id="section-preview" hidden>
+    <table class="preview-table">
+      <tbody id="preview-body"></tbody>
+    </table>
+
+    <div class="field-row">
+      <label>代號 / 暱稱 *</label>
+      <input id="input-nickname" type="text" />
+    </div>
+    <div class="field-row">
+      <label>總價（萬）*</label>
+      <input id="input-total-price" type="number" step="0.1" min="0.1" placeholder="請填寫" />
+    </div>
+  </div>
+
+  <!-- 儲存按鈕 -->
+  <div class="actions" id="section-save-actions" hidden>
+    <button id="btn-save"    class="btn btn--success btn--full" hidden>儲存到 BestHouse</button>
+    <button id="btn-go-edit" class="btn btn--outline btn--full"  hidden>前往編輯</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

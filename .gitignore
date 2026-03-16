@@ -17,5 +17,8 @@ besthouse-frontend/.angular/
 .DS_Store
 Thumbs.db
 
+# Secrets（不上傳 API Key）
+besthouse-backend/src/main/resources/application-local.yml
+
 # Logs
 *.log

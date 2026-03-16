@@ -37,4 +37,9 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/house-tips/house-tips.component').then(m => m.HouseTipsComponent),
   },
+  {
+    path: 'ai-import',
+    loadComponent: () =>
+      import('./features/ai-import/ai-import.component').then(m => m.AiImportComponent),
+  },
 ];
