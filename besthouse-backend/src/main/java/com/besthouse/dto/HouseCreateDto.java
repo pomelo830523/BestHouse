@@ -53,6 +53,8 @@ public class HouseCreateDto {
 
     private BigDecimal monthlyFee;
 
+    private BigDecimal monthlyRent;
+
     private String listingUrl;
     private String note;
 

@@ -35,6 +35,13 @@ export interface House {
   parkingPrice: number;
   parkingPing: number;
   monthlyFee: number;
+  monthlyRent: number | null;
+  /** 每月貸款利息（元，後端計算） */
+  monthlyMortgage: number | null;
+  /** 每月純利息（月付 - 本金/360，元，後端計算） */
+  monthlyInterest: number | null;
+  /** 買房月息是租金的百分比（後端計算） */
+  interestToRentRatio: number | null;
   listingUrl: string | null;
   note: string;
   hasVisited: boolean;
@@ -83,6 +90,7 @@ export interface HouseCreateRequest {
   parkingPrice?: number;
   parkingPing?: number;
   monthlyFee?: number;
+  monthlyRent?: number | null;
   note?: string;
   listingUrl?: string;
   hasVisited?: boolean;

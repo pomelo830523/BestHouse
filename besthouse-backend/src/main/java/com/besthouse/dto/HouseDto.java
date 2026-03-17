@@ -31,6 +31,13 @@ public class HouseDto {
     private BigDecimal parkingPrice;
     private BigDecimal parkingPing;
     private BigDecimal monthlyFee;
+    private BigDecimal monthlyRent;
+    /** 每月房貸月付（元，貸款8成 年利率2.6% 本息平均攤還30年，自動計算） */
+    private BigDecimal monthlyMortgage;
+    /** 每月純利息（月付 - 本金/360，元，自動計算） */
+    private BigDecimal monthlyInterest;
+    /** 買房月息是租金的百分比（monthlyInterest / monthlyRent × 100，自動計算） */
+    private BigDecimal interestToRentRatio;
     private String listingUrl;
     private String note;
     private Boolean hasVisited;

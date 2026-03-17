@@ -78,6 +78,9 @@ public class House {
     @Column(name = "MONTHLY_FEE", precision = 10, scale = 2)
     private BigDecimal monthlyFee;
 
+    @Column(name = "MONTHLY_RENT", precision = 10, scale = 2)
+    private BigDecimal monthlyRent;
+
     @Column(name = "LISTING_URL", length = 1000)
     private String listingUrl;
 

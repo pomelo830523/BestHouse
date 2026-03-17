@@ -74,6 +74,7 @@ public class HouseService {
         house.setParkingPrice(dto.getParkingPrice());
         house.setParkingPing(dto.getParkingPing());
         house.setMonthlyFee(dto.getMonthlyFee());
+        house.setMonthlyRent(dto.getMonthlyRent());
         house.setListingUrl(dto.getListingUrl());
         house.setNote(dto.getNote());
         house.setHasVisited(dto.getHasVisited() != null ? dto.getHasVisited() : false);
@@ -123,6 +124,12 @@ public class HouseService {
         BigDecimal priceWithoutParking = calculatePricePerPingWithoutParking(
                 house.getTotalPrice(), house.getParkingPrice(), house.getParkingPing(),
                 house.getBuildAreaPing(), house.getParkingType());
+        BigDecimal monthlyMortgage = calculateMonthlyMortgage(house.getTotalPrice());
+        BigDecimal loanAmount = house.getTotalPrice() != null
+                ? house.getTotalPrice().multiply(BigDecimal.valueOf(10000)).multiply(new BigDecimal("0.8"))
+                : null;
+        BigDecimal monthlyInterest = calculateMonthlyInterest(monthlyMortgage, loanAmount);
+        BigDecimal interestToRentRatio = calculateInterestToRentRatio(monthlyInterest, house.getMonthlyRent());
 
         return HouseDto.builder()
                 .houseId(house.getHouseId())
@@ -143,6 +150,10 @@ public class HouseService {
                 .parkingPrice(house.getParkingPrice())
                 .parkingPing(house.getParkingPing())
                 .monthlyFee(house.getMonthlyFee())
+                .monthlyRent(house.getMonthlyRent())
+                .monthlyMortgage(monthlyMortgage)
+                .monthlyInterest(monthlyInterest)
+                .interestToRentRatio(interestToRentRatio)
                 .listingUrl(house.getListingUrl())
                 .note(house.getNote())
                 .hasVisited(house.getHasVisited())
@@ -191,6 +202,7 @@ public class HouseService {
                 .parkingPrice(dto.getParkingPrice() != null ? dto.getParkingPrice() : BigDecimal.ZERO)
                 .parkingPing(dto.getParkingPing())
                 .monthlyFee(dto.getMonthlyFee())
+                .monthlyRent(dto.getMonthlyRent())
                 .listingUrl(dto.getListingUrl())
                 .note(dto.getNote())
                 .hasVisited(dto.getHasVisited() != null ? dto.getHasVisited() : false)
@@ -220,6 +232,44 @@ public class HouseService {
             return null;
         }
         return totalPrice.divide(buildAreaPing, 2, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * 計算每月房貸月付（本息平均攤還，30年，年利率2.6%，貸款8成）
+     * 公式：M = P × r(1+r)^n / ((1+r)^n - 1)，n = 360
+     */
+    private BigDecimal calculateMonthlyMortgage(BigDecimal totalPrice) {
+        if (totalPrice == null || totalPrice.compareTo(BigDecimal.ZERO) == 0) {
+            return null;
+        }
+        double principal = totalPrice.doubleValue() * 10000 * 0.8;
+        double monthlyRate = 0.026 / 12;
+        int months = 360;
+        double factor = Math.pow(1 + monthlyRate, months);
+        double monthly = principal * monthlyRate * factor / (factor - 1);
+        return BigDecimal.valueOf(monthly).setScale(0, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * 計算每月純利息：月付 - 貸款總額/360
+     */
+    private BigDecimal calculateMonthlyInterest(BigDecimal monthlyMortgage, BigDecimal loanAmount) {
+        if (monthlyMortgage == null || loanAmount == null) {
+            return null;
+        }
+        BigDecimal monthlyPrincipal = loanAmount.divide(BigDecimal.valueOf(360), 0, RoundingMode.HALF_UP);
+        return monthlyMortgage.subtract(monthlyPrincipal);
+    }
+
+    /**
+     * 計算買房月息是租金的百分比：monthlyInterest / monthlyRent × 100
+     */
+    private BigDecimal calculateInterestToRentRatio(BigDecimal monthlyInterest, BigDecimal monthlyRent) {
+        if (monthlyInterest == null || monthlyRent == null || monthlyRent.compareTo(BigDecimal.ZERO) == 0) {
+            return null;
+        }
+        return monthlyInterest.divide(monthlyRent, 2, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100));
     }
 
     private BigDecimal calculatePricePerPingWithoutParking(

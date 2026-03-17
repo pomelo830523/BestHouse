@@ -32,6 +32,11 @@ export class HouseFormComponent implements OnInit {
   registryVsOriginalDiffPct: number | null = null;
   registryVsDiscountedDiffPct: number | null = null;
 
+  // 租買比較
+  monthlyMortgage: number | null = null;
+  monthlyInterest: number | null = null;
+  interestToRentRatio: number | null = null;
+
   readonly parkingTypes: ParkingType[] = ['NONE', 'FLAT', 'RAMP_FLAT', 'MECHANICAL', 'RAMP_MECHANICAL'];
   readonly parkingLabels = PARKING_TYPE_LABELS;
   readonly floodRisks: FloodRisk[] = ['LOW', 'MEDIUM', 'HIGH'];
@@ -78,6 +83,7 @@ export class HouseFormComponent implements OnInit {
       parkingPrice: [0],
       parkingPing: [null],
       monthlyFee: [null],
+      monthlyRent: [null],
       listingUrl: [''],
       note: [''],
       // 看房評估欄位（tri-state: '' = 未查, 'true' = 是, 'false' = 否）
@@ -123,6 +129,7 @@ export class HouseFormComponent implements OnInit {
           parkingPrice: house.parkingPrice,
           parkingPing: house.parkingPing,
           monthlyFee: house.monthlyFee,
+          monthlyRent: house.monthlyRent,
           listingUrl: house.listingUrl ?? '',
           note: house.note,
           hasMoldOrLeak: this.toBoolStr(house.hasMoldOrLeak),
@@ -159,6 +166,8 @@ export class HouseFormComponent implements OnInit {
     const discountPct: number  = +this.form.get('discountPercent')?.value || 0;
     const estimatedPrice: number = +this.form.get('estimatedRegistryPrice')?.value || 0;
 
+    const monthlyRent: number = +this.form.get('monthlyRent')?.value || 0;
+
     if (totalPrice > 0 && buildAreaPing > 0) {
       const netArea = buildAreaPing - parkingPing;
 
@@ -183,6 +192,25 @@ export class HouseFormComponent implements OnInit {
         this.discountedPricePerPingWithoutParking = null;
       }
 
+      // 租買比較（本息平均攤還，30年，年利率2.6%，貸款8成）
+      if (totalPrice > 0) {
+        const principal = totalPrice * 10000 * 0.8;
+        const r = 0.026 / 12;
+        const n = 360;
+        const factor = Math.pow(1 + r, n);
+        this.monthlyMortgage = +((principal * r * factor) / (factor - 1)).toFixed(0);
+      } else {
+        this.monthlyMortgage = null;
+      }
+      const loanAmount = totalPrice * 10000 * 0.8;
+      const monthlyPrincipal = Math.round(loanAmount / 360);
+      this.monthlyInterest = this.monthlyMortgage !== null
+        ? this.monthlyMortgage - monthlyPrincipal
+        : null;
+      this.interestToRentRatio = (this.monthlyInterest !== null && monthlyRent > 0)
+        ? +((this.monthlyInterest / monthlyRent * 100).toFixed(2))
+        : null;
+
       // 實價登錄比較
       if (estimatedPrice > 0) {
         this.registryVsOriginalDiffPct = +((totalPrice - estimatedPrice) / estimatedPrice * 100).toFixed(2);
@@ -203,6 +231,9 @@ export class HouseFormComponent implements OnInit {
       this.discountedPricePerPingWithoutParking = null;
       this.registryVsOriginalDiffPct = null;
       this.registryVsDiscountedDiffPct = null;
+      this.monthlyMortgage = null;
+      this.monthlyInterest = null;
+      this.interestToRentRatio = null;
     }
   }
 
@@ -239,6 +270,7 @@ export class HouseFormComponent implements OnInit {
       parkingPrice: raw.parkingPrice || undefined,
       parkingPing: raw.parkingPing || undefined,
       monthlyFee: raw.monthlyFee || undefined,
+      monthlyRent: raw.monthlyRent ?? undefined,
       listingUrl: raw.listingUrl || undefined,
       note: raw.note || undefined,
       hasVisited: raw.hasVisited ?? false,

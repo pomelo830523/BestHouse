@@ -100,6 +100,31 @@
         <label>管理費（元/月）</label>
         <input type="number" formControlName="monthlyFee" min="0" />
       </div>
+      <div class="form-group">
+        <label>每月租金（元/月）</label>
+        <input type="number" formControlName="monthlyRent" min="0" placeholder="若此物件可出租，填入市場租金" />
+      </div>
+    </div>
+
+    <!-- 貸款月息 & 租買比較 -->
+    <div class="price-calc price-calc--mortgage" *ngIf="monthlyMortgage !== null">
+      <div class="price-calc__header">貸款試算（8成貸款，年利率 2.6%，本息平均攤還 30 年）</div>
+      <div class="price-calc__items">
+        <div class="price-calc__item">
+          <span class="price-calc__label">每月房貸（本利）</span>
+          <span class="price-calc__value">{{ monthlyMortgage | number:'1.0-0' }} 元</span>
+        </div>
+        <div class="price-calc__item" *ngIf="monthlyInterest !== null">
+          <span class="price-calc__label">每月純利息</span>
+          <span class="price-calc__value">{{ monthlyInterest | number:'1.0-0' }} 元</span>
+        </div>
+        <div class="price-calc__item" *ngIf="interestToRentRatio !== null">
+          <span class="price-calc__label">買房月息是租金的</span>
+          <span class="price-calc__value" [ngClass]="interestToRentRatio > 100 ? 'diff--higher' : 'diff--lower'">
+            {{ interestToRentRatio | number:'1.2-2' }}%
+          </span>
+        </div>
+      </div>
     </div>
 
     <!-- 即時計算單價 -->
