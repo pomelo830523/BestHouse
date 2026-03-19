@@ -1,0 +1,26 @@
+CREATE TABLE REAL_PRICE_RECORD (
+    RECORD_ID          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    CITY_CODE          VARCHAR(2)     NOT NULL COMMENT '縣市代碼（J=新竹縣, O=新竹市）',
+    DISTRICT           VARCHAR(50)    COMMENT '鄉鎮市區',
+    ADDRESS            VARCHAR(500)   COMMENT '建物區段門牌',
+    TRANSACTION_DATE   DATE           COMMENT '交易年月日',
+    BUILDING_TYPE      VARCHAR(100)   COMMENT '建物型態',
+    TOTAL_AREA_PING    DECIMAL(10,2)  COMMENT '建物移轉總面積（坪）',
+    FLOOR_DESC         VARCHAR(50)    COMMENT '移轉層次（原始文字）',
+    FLOOR_NUM          INT            COMMENT '移轉層次（解析後數字）',
+    TOTAL_FLOOR        INT            COMMENT '總樓層數',
+    BEDROOM_COUNT      INT            COMMENT '格局-房',
+    LIVING_ROOM_COUNT  INT            COMMENT '格局-廳',
+    BATHROOM_COUNT     INT            COMMENT '格局-衛',
+    COMPLETED_YEAR     INT            COMMENT '建築完成西元年',
+    HOUSE_AGE_YEAR     INT            COMMENT '屋齡（年）',
+    HAS_ELEVATOR       BOOLEAN        COMMENT '電梯',
+    HAS_MANAGEMENT     BOOLEAN        COMMENT '有無管理組織',
+    TOTAL_PRICE_WAN    DECIMAL(12,2)  COMMENT '總價（萬元）',
+    PARKING_PRICE_WAN  DECIMAL(10,2)  COMMENT '車位總價（萬元）',
+    PRICE_PER_PING_WAN DECIMAL(10,2)  COMMENT '每坪單價（萬元）',
+    SYNCED_AT          DATETIME       NOT NULL COMMENT '同步時間',
+
+    INDEX IDX_RPC_CITY_DISTRICT (CITY_CODE, DISTRICT),
+    INDEX IDX_RPC_TRANSACTION_DATE (TRANSACTION_DATE)
+) COMMENT='實價登錄成交紀錄';

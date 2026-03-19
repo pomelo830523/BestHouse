@@ -160,10 +160,135 @@
       </div>
       <div class="form-group">
         <label>實價登錄估計總價（萬）</label>
-        <input type="number" formControlName="estimatedRegistryPrice" step="0.1" min="0"
-               placeholder="填入實價登錄行情" />
+        <div class="input-with-action">
+          <input type="number" formControlName="estimatedRegistryPrice" step="0.1" min="0"
+                 placeholder="填入實價登錄行情" />
+          <button type="button" class="btn btn--outline btn--sm"
+                  *ngIf="isEditMode" [disabled]="isLoadingMatches"
+                  (click)="queryRealPrice()">
+            {{ isLoadingMatches ? '查詢中...' : '查實價登錄' }}
+          </button>
+        </div>
       </div>
     </div>
+
+    <!-- 實價登錄查詢結果 -->
+    <div class="rp-results" *ngIf="realPriceMatches.length > 0">
+      <div class="rp-results__header">
+        <span class="rp-results__title">實價登錄相近成交（近 3 年，依相似度排序）</span>
+        <span class="rp-results__formula-toggle" (click)="showFormula = !showFormula">
+          {{ showFormula ? '▲ 隱藏公式' : '▼ 相似度公式' }}
+        </span>
+      </div>
+      <div class="rp-formula" *ngIf="showFormula">
+        <div class="rp-formula__section">
+          <span class="rp-formula__label">硬篩選（不符即排除）</span>
+          <div class="rp-formula__filters">
+            <span>地區相符</span>
+            <span>同路名（含跨前綴比對）</span>
+            <span>門牌號差 ≤ 30</span>
+            <span>屋齡差 ≤ 10 年</span>
+          </div>
+        </div>
+        <div class="rp-formula__section">
+          <span class="rp-formula__label">相似分（0–100，加權平均）</span>
+          <div class="rp-formula__rows">
+            <div class="rp-formula__row">
+              <span class="rp-formula__dim">面積差</span>
+              <span class="rp-formula__weight">75%</span>
+              <span class="rp-formula__rule">差距超過 35% → 0 分</span>
+            </div>
+            <div class="rp-formula__row">
+              <span class="rp-formula__dim">屋齡差</span>
+              <span class="rp-formula__weight">15%</span>
+              <span class="rp-formula__rule">差距超過 10 年 → 0 分</span>
+            </div>
+            <div class="rp-formula__row">
+              <span class="rp-formula__dim">樓層差</span>
+              <span class="rp-formula__weight">7%</span>
+              <span class="rp-formula__rule">差距超過 6 層 → 0 分</span>
+            </div>
+            <div class="rp-formula__row">
+              <span class="rp-formula__dim">房間數差</span>
+              <span class="rp-formula__weight">3%</span>
+              <span class="rp-formula__rule">差距超過 2 間 → 0 分</span>
+            </div>
+          </div>
+          <div class="rp-formula__note">門牌號差距僅顯示於備註，不計入分數</div>
+        </div>
+      </div>
+      <div class="rp-card" *ngFor="let m of realPriceMatches">
+
+        <!-- 實價登錄原始資料 -->
+        <div class="rp-card__data">
+          <div class="rp-card__address">{{ m.address || m.district }}</div>
+          <div class="rp-card__rows">
+            <div class="rp-card__row">
+              <span class="rp-card__label">成交日期</span>
+              <span class="rp-card__value">{{ m.transactionDate }}</span>
+            </div>
+            <div class="rp-card__row">
+              <span class="rp-card__label">建物型態</span>
+              <span class="rp-card__value">{{ m.buildingType || '-' }}</span>
+            </div>
+            <div class="rp-card__row">
+              <span class="rp-card__label">面積</span>
+              <span class="rp-card__value">{{ m.totalAreaPing | number:'1.1-1' }} 坪</span>
+            </div>
+            <div class="rp-card__row">
+              <span class="rp-card__label">樓層／總樓層</span>
+              <span class="rp-card__value">{{ m.floorDesc || '-' }}／{{ m.totalFloor != null ? m.totalFloor + 'F' : '-' }}</span>
+            </div>
+            <div class="rp-card__row">
+              <span class="rp-card__label">屋齡</span>
+              <span class="rp-card__value">{{ m.houseAgeYear != null ? m.houseAgeYear + ' 年' : '-' }}</span>
+            </div>
+            <div class="rp-card__row">
+              <span class="rp-card__label">格局</span>
+              <span class="rp-card__value">
+                {{ m.bedroomCount != null ? m.bedroomCount + '房' : '' }}{{ m.livingRoomCount != null ? m.livingRoomCount + '廳' : '' }}{{ m.bathroomCount != null ? m.bathroomCount + '衛' : '' }}
+              </span>
+            </div>
+            <div class="rp-card__row">
+              <span class="rp-card__label">電梯／管委會</span>
+              <span class="rp-card__value">
+                {{ m.hasElevator === true ? '有電梯' : m.hasElevator === false ? '無電梯' : '-' }} ／
+                {{ m.hasManagement === true ? '有管委會' : m.hasManagement === false ? '無管委會' : '-' }}
+              </span>
+            </div>
+            <div class="rp-card__row rp-card__row--price">
+              <span class="rp-card__label">成交總價</span>
+              <span class="rp-card__value rp-card__price">{{ m.totalPriceWan | number:'1.0-0' }} 萬</span>
+            </div>
+            <div class="rp-card__row" *ngIf="m.parkingPriceWan">
+              <span class="rp-card__label">車位總價</span>
+              <span class="rp-card__value">{{ m.parkingPriceWan | number:'1.0-0' }} 萬</span>
+            </div>
+            <div class="rp-card__row" *ngIf="m.parkingAreaPing">
+              <span class="rp-card__label">車位坪數</span>
+              <span class="rp-card__value">{{ m.parkingAreaPing | number:'1.1-1' }} 坪</span>
+            </div>
+            <div class="rp-card__row">
+              <span class="rp-card__label">不含車位每坪</span>
+              <span class="rp-card__value">{{ m.pricePerPingWan | number:'1.2-2' }} 萬</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 系統計算欄位（與實價登錄資料做區隔） -->
+        <div class="rp-card__calc">
+          <div class="rp-card__score">
+            <span class="rp-card__score-num">{{ m.similarityScore }}</span>
+            <span class="rp-card__score-label">相似分</span>
+          </div>
+          <div class="rp-card__note">{{ m.similarityNote }}</div>
+          <button type="button" class="btn btn--primary btn--sm"
+                  (click)="applyRealPrice(m)">採用此價</button>
+        </div>
+
+      </div>
+    </div>
+    <div class="alert alert--error" *ngIf="matchError">{{ matchError }}</div>
 
     <!-- 折扣後計算 -->
     <div class="price-calc price-calc--discount" *ngIf="discountedTotalPrice !== null">

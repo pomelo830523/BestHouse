@@ -279,10 +279,15 @@ public class HouseService {
             return null;
         }
         boolean hasParking = parkingType != null && parkingType != ParkingType.NONE;
-        BigDecimal effectiveParkingPrice = (hasParking && parkingPrice != null) ? parkingPrice : BigDecimal.ZERO;
-        BigDecimal effectiveParkingPing  = (hasParking && parkingPing  != null) ? parkingPing  : BigDecimal.ZERO;
+        if (!hasParking || parkingPing == null || parkingPing.compareTo(BigDecimal.ZERO) == 0) {
+            return null;
+        }
+        // 車位價未填時，以 車位坪 × 20萬 估算
+        BigDecimal effectiveParkingPrice = (parkingPrice != null && parkingPrice.compareTo(BigDecimal.ZERO) > 0)
+                ? parkingPrice
+                : parkingPing.multiply(new BigDecimal("20"));
         BigDecimal netPrice = totalPrice.subtract(effectiveParkingPrice);
-        BigDecimal netArea  = buildAreaPing.subtract(effectiveParkingPing);
+        BigDecimal netArea  = buildAreaPing.subtract(parkingPing);
         if (netArea.compareTo(BigDecimal.ZERO) <= 0) {
             return null;
         }

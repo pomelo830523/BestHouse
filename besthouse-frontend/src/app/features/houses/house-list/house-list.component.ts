@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HouseService } from '../../../core/services/house.service';
-import { House, PARKING_TYPE_LABELS } from '../../../core/models/house.model';
+import { RealPriceService } from '../../../core/services/real-price.service';
+import { House } from '../../../core/models/house.model';
 
 type SortableColumn =
   | 'buildAreaPing' | 'indoorPing' | 'totalPrice'
@@ -19,14 +20,16 @@ type SortableColumn =
 export class HouseListComponent implements OnInit {
   houses: House[] = [];
   isLoading = false;
+  isSyncing = false;
   errorMessage = '';
   successMessage = '';
-  parkingLabels = PARKING_TYPE_LABELS;
-
   sortColumn: SortableColumn | null = null;
   sortDirection: 'asc' | 'desc' = 'asc';
 
-  constructor(private houseService: HouseService) {}
+  constructor(
+    private houseService: HouseService,
+    private realPriceService: RealPriceService,
+  ) {}
 
   ngOnInit(): void {
     this.loadHouses();
@@ -64,6 +67,22 @@ export class HouseListComponent implements OnInit {
         this.loadHouses();
       },
       error: () => { this.errorMessage = '恢復失敗'; },
+    });
+  }
+
+  syncRealPrice(): void {
+    if (!confirm('將下載新竹縣 + 新竹市的實價登錄資料（約需 10~30 秒），確定開始？')) return;
+    this.isSyncing = true;
+    this.errorMessage = '';
+    this.realPriceService.syncAll().subscribe({
+      next: (result) => {
+        this.successMessage = `實價登錄同步完成，共 ${result.total} 筆（新竹縣 ${result.counts['J'] ?? 0} 筆、新竹市 ${result.counts['O'] ?? 0} 筆）`;
+        this.isSyncing = false;
+      },
+      error: () => {
+        this.errorMessage = '同步失敗，請確認網路連線';
+        this.isSyncing = false;
+      },
     });
   }
 
@@ -115,13 +134,23 @@ export class HouseListComponent implements OnInit {
     return this.sortedHouses(this.houses.filter(h => h.status === 'ELIMINATED'));
   }
 
-  registryDiffPct(house: House): number | null {
+  /** 開價 vs 實價登錄 */
+  originalRegistryDiffPct(house: House): number | null {
     if (!house.estimatedRegistryPrice || house.estimatedRegistryPrice <= 0) return null;
-    const discounted = house.discountPercent && house.discountPercent > 0
-      ? house.totalPrice * (1 - house.discountPercent / 100)
-      : house.totalPrice;
-    if (discounted <= 0) return null;
+    return +((house.totalPrice - house.estimatedRegistryPrice) / house.estimatedRegistryPrice * 100).toFixed(1);
+  }
+
+  /** 折扣後 vs 實價登錄（無折扣時回 null） */
+  discountedRegistryDiffPct(house: House): number | null {
+    if (!house.estimatedRegistryPrice || house.estimatedRegistryPrice <= 0) return null;
+    if (!house.discountPercent || house.discountPercent <= 0) return null;
+    const discounted = house.totalPrice * (1 - house.discountPercent / 100);
     return +((discounted - house.estimatedRegistryPrice) / house.estimatedRegistryPrice * 100).toFixed(1);
+  }
+
+  /** @deprecated 相容舊版，改用 originalRegistryDiffPct / discountedRegistryDiffPct */
+  registryDiffPct(house: House): number | null {
+    return this.originalRegistryDiffPct(house);
   }
 
   mapsUrl(address: string): string {

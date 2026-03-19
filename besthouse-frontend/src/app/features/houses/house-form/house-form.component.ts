@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HouseService } from '../../../core/services/house.service';
+import { RealPriceService } from '../../../core/services/real-price.service';
 import { FloodRisk, FLOOD_RISK_LABELS, ParkingType, PARKING_TYPE_LABELS } from '../../../core/models/house.model';
+import { RealPriceMatch } from '../../../core/models/real-price.model';
 
 @Component({
   selector: 'app-house-form',
@@ -42,9 +44,16 @@ export class HouseFormComponent implements OnInit {
   readonly floodRisks: FloodRisk[] = ['LOW', 'MEDIUM', 'HIGH'];
   readonly floodRiskLabels = FLOOD_RISK_LABELS;
 
+  // 實價登錄查詢
+  realPriceMatches: RealPriceMatch[] = [];
+  isLoadingMatches = false;
+  matchError = '';
+  showFormula = false;
+
   constructor(
     private fb: FormBuilder,
     private houseService: HouseService,
+    private realPriceService: RealPriceService,
     private router: Router,
     private route: ActivatedRoute,
   ) {}
@@ -161,8 +170,12 @@ export class HouseFormComponent implements OnInit {
     const buildAreaPing: number = +this.form.get('buildAreaPing')?.value || 0;
     const parkingType: ParkingType = this.form.get('parkingType')?.value;
     const hasParking = parkingType && parkingType !== 'NONE';
-    const parkingPrice: number = hasParking ? (+this.form.get('parkingPrice')?.value || 0) : 0;
+    const parkingPriceFilled: number = hasParking ? (+this.form.get('parkingPrice')?.value || 0) : 0;
     const parkingPing: number  = hasParking ? (+this.form.get('parkingPing')?.value  || 0) : 0;
+    // 車位價未填時，以 車位坪 × 20萬 估算
+    const parkingPrice: number = (hasParking && parkingPriceFilled === 0 && parkingPing > 0)
+      ? parkingPing * 20
+      : parkingPriceFilled;
     const discountPct: number  = +this.form.get('discountPercent')?.value || 0;
     const estimatedPrice: number = +this.form.get('estimatedRegistryPrice')?.value || 0;
 
@@ -306,6 +319,29 @@ export class HouseFormComponent implements OnInit {
         this.isSubmitting = false;
       },
     });
+  }
+
+  queryRealPrice(): void {
+    if (!this.houseId) return;
+    this.isLoadingMatches = true;
+    this.matchError = '';
+    this.realPriceMatches = [];
+    this.realPriceService.getMatches(this.houseId).subscribe({
+      next: (matches) => {
+        this.realPriceMatches = matches;
+        this.isLoadingMatches = false;
+        if (matches.length === 0) this.matchError = '找不到相近的實價登錄紀錄（請確認地址是否填寫，或先同步實價登錄資料）';
+      },
+      error: () => {
+        this.matchError = '查詢失敗';
+        this.isLoadingMatches = false;
+      },
+    });
+  }
+
+  applyRealPrice(match: RealPriceMatch): void {
+    this.form.patchValue({ estimatedRegistryPrice: match.totalPriceWan });
+    this.realPriceMatches = [];
   }
 
   cancel(): void {

@@ -1,6 +1,9 @@
 <div class="page-header">
   <h2>房屋列表</h2>
   <div class="actions">
+    <button class="btn btn--outline btn--sm" (click)="syncRealPrice()" [disabled]="isSyncing">
+      {{ isSyncing ? '同步中...' : '同步實價登錄' }}
+    </button>
     <button class="btn btn--warn btn--sm" (click)="applyFilters()" [disabled]="isLoading">
       套用篩選條件
     </button>
@@ -30,9 +33,11 @@
             <th class="sortable" (click)="sortBy('indoorPing')">
               室內坪 <span class="sort-icon">{{ sortIcon('indoorPing') }}</span>
             </th>
+            <th>車位坪</th>
             <th class="sortable" (click)="sortBy('totalPrice')">
-              總價（萬）<span class="sort-icon">{{ sortIcon('totalPrice') }}</span>
+              總價 <span class="sort-icon">{{ sortIcon('totalPrice') }}</span>
             </th>
+            <th>車位價</th>
             <th class="sortable" (click)="sortBy('pricePerPingWithoutParking')">
               不含車位單價 <span class="sort-icon">{{ sortIcon('pricePerPingWithoutParking') }}</span>
             </th>
@@ -43,9 +48,9 @@
               樓層 <span class="sort-icon">{{ sortIcon('floor') }}</span>
             </th>
             <th>格局</th>
-            <th>車位</th>
+            <th>開價 vs 實登</th>
             <th>看房</th>
-            <th>實價登錄</th>
+            <th>折扣後 vs 實登</th>
             <th>操作</th>
           </tr>
         </thead>
@@ -67,24 +72,33 @@
             </td>
             <td class="num">{{ house.buildAreaPing ?? '-' }}</td>
             <td class="num">{{ house.indoorPing ?? '-' }}</td>
+            <td class="num">{{ house.parkingPing ?? '-' }}</td>
             <td class="num">{{ house.totalPrice | number:'1.0-0' }}</td>
+            <td class="num">{{ house.parkingPrice ? (house.parkingPrice | number:'1.0-0') : '-' }}</td>
             <td class="num">{{ house.pricePerPingWithoutParking | number:'1.2-2' }}</td>
             <td class="num">{{ house.houseAgeYear != null ? house.houseAgeYear + '年' : '-' }}</td>
             <td class="num">{{ house.floor != null ? house.floor + 'F' : '-' }}</td>
             <td>{{ house.bedroomCount }}房{{ house.livingRoomCount }}廳{{ house.bathroomCount }}衛</td>
-            <td>{{ parkingLabels[house.parkingType] || '-' }}</td>
+            <td class="num">
+              <ng-container *ngIf="originalRegistryDiffPct(house) !== null; else noRegistry1">
+                <span [ngClass]="diffClass(originalRegistryDiffPct(house)!)">
+                  {{ originalRegistryDiffPct(house)! > 0 ? '+' : '' }}{{ originalRegistryDiffPct(house) }}%
+                </span>
+              </ng-container>
+              <ng-template #noRegistry1>-</ng-template>
+            </td>
             <td class="visited-cell">
               <span class="visited-badge" [class.visited]="house.hasVisited">
                 {{ house.hasVisited ? '✓' : '—' }}
               </span>
             </td>
             <td class="num">
-              <ng-container *ngIf="registryDiffPct(house) !== null; else noRegistry">
-                <span [ngClass]="diffClass(registryDiffPct(house)!)">
-                  {{ registryDiffPct(house)! > 0 ? '+' : '' }}{{ registryDiffPct(house) }}%
+              <ng-container *ngIf="discountedRegistryDiffPct(house) !== null; else noRegistry2">
+                <span [ngClass]="diffClass(discountedRegistryDiffPct(house)!)">
+                  {{ discountedRegistryDiffPct(house)! > 0 ? '+' : '' }}{{ discountedRegistryDiffPct(house) }}%
                 </span>
               </ng-container>
-              <ng-template #noRegistry>-</ng-template>
+              <ng-template #noRegistry2>-</ng-template>
             </td>
             <td class="row-actions">
               <a class="btn btn--outline btn--sm" [routerLink]="['/houses', house.houseId, 'rate']">評分</a>
