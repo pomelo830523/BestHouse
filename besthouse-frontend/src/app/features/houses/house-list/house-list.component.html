@@ -1,6 +1,9 @@
 <div class="page-header">
   <h2>房屋列表</h2>
   <div class="actions">
+    <button class="btn btn--outline btn--sm" (click)="showColumnPanel = !showColumnPanel">
+      欄位設定 {{ showColumnPanel ? '▲' : '▼' }}
+    </button>
     <button class="btn btn--outline btn--sm" (click)="syncRealPrice()" [disabled]="isSyncing">
       {{ isSyncing ? '同步中...' : '同步實價登錄' }}
     </button>
@@ -8,6 +11,17 @@
       套用篩選條件
     </button>
     <a class="btn btn--primary btn--sm" routerLink="/houses/new">+ 新增房屋</a>
+  </div>
+</div>
+
+<!-- 欄位顯示/隱藏 panel -->
+<div class="column-panel" *ngIf="showColumnPanel">
+  <div class="column-panel__title">選擇要顯示的欄位</div>
+  <div class="column-panel__grid">
+    <label *ngFor="let col of toggleableColumns" class="column-toggle">
+      <input type="checkbox" [checked]="isVisible(col)" (change)="toggleColumn(col)">
+      {{ columnLabels[col] }}
+    </label>
   </div>
 </div>
 
@@ -25,33 +39,67 @@
       <table class="table">
         <thead>
           <tr>
-            <th>代號</th>
-            <th>地址</th>
-            <th class="sortable" (click)="sortBy('buildAreaPing')">
+            <th appColResizable>代號</th>
+            <th appColResizable>地址</th>
+            <th appColResizable *ngIf="isVisible('buildAreaPing')" class="sortable" (click)="sortBy('buildAreaPing')">
               總坪 <span class="sort-icon">{{ sortIcon('buildAreaPing') }}</span>
             </th>
-            <th class="sortable" (click)="sortBy('indoorPing')">
+            <th appColResizable *ngIf="isVisible('indoorPing')" class="sortable" (click)="sortBy('indoorPing')">
               室內坪 <span class="sort-icon">{{ sortIcon('indoorPing') }}</span>
             </th>
-            <th>車位坪</th>
-            <th class="sortable" (click)="sortBy('totalPrice')">
+            <th appColResizable *ngIf="isVisible('parkingPing')" class="sortable" (click)="sortBy('parkingPing')">
+              車位坪 <span class="sort-icon">{{ sortIcon('parkingPing') }}</span>
+            </th>
+            <th appColResizable *ngIf="isVisible('totalPrice')" class="sortable" (click)="sortBy('totalPrice')">
               總價 <span class="sort-icon">{{ sortIcon('totalPrice') }}</span>
             </th>
-            <th>車位價</th>
-            <th class="sortable" (click)="sortBy('pricePerPingWithoutParking')">
+            <th appColResizable *ngIf="isVisible('parkingPrice')" class="sortable" (click)="sortBy('parkingPrice')">
+              車位價 <span class="sort-icon">{{ sortIcon('parkingPrice') }}</span>
+            </th>
+            <th appColResizable *ngIf="isVisible('pricePerPingWithParking')" class="sortable" (click)="sortBy('pricePerPingWithParking')">
+              含車位單價 <span class="sort-icon">{{ sortIcon('pricePerPingWithParking') }}</span>
+            </th>
+            <th appColResizable *ngIf="isVisible('pricePerPingWithoutParking')" class="sortable" (click)="sortBy('pricePerPingWithoutParking')">
               不含車位單價 <span class="sort-icon">{{ sortIcon('pricePerPingWithoutParking') }}</span>
             </th>
-            <th class="sortable" (click)="sortBy('houseAgeYear')">
+            <th appColResizable *ngIf="isVisible('monthlyFee')" class="sortable" (click)="sortBy('monthlyFee')">
+              管理費 <span class="sort-icon">{{ sortIcon('monthlyFee') }}</span>
+            </th>
+            <th appColResizable *ngIf="isVisible('monthlyMortgage')" class="sortable" (click)="sortBy('monthlyMortgage')">
+              月付房貸 <span class="sort-icon">{{ sortIcon('monthlyMortgage') }}</span>
+            </th>
+            <th appColResizable *ngIf="isVisible('monthlyInterest')" class="sortable" (click)="sortBy('monthlyInterest')">
+              月付利息 <span class="sort-icon">{{ sortIcon('monthlyInterest') }}</span>
+            </th>
+            <th appColResizable *ngIf="isVisible('interestToRentRatio')" class="sortable" (click)="sortBy('interestToRentRatio')">
+              息租比 <span class="sort-icon">{{ sortIcon('interestToRentRatio') }}</span>
+            </th>
+            <th appColResizable *ngIf="isVisible('houseAgeYear')" class="sortable" (click)="sortBy('houseAgeYear')">
               屋齡 <span class="sort-icon">{{ sortIcon('houseAgeYear') }}</span>
             </th>
-            <th class="sortable" (click)="sortBy('floor')">
+            <th appColResizable *ngIf="isVisible('floor')" class="sortable" (click)="sortBy('floor')">
               樓層 <span class="sort-icon">{{ sortIcon('floor') }}</span>
             </th>
-            <th>格局</th>
-            <th>開價 vs 實登</th>
-            <th>看房</th>
-            <th>折扣後 vs 實登</th>
-            <th>操作</th>
+            <th appColResizable *ngIf="isVisible('layout')">格局</th>
+            <th appColResizable *ngIf="isVisible('originalRegistryDiff')" class="sortable" (click)="sortBy('originalRegistryDiff')">
+              開價 vs 實登 <span class="sort-icon">{{ sortIcon('originalRegistryDiff') }}</span>
+            </th>
+            <th appColResizable *ngIf="isVisible('hasVisited')" class="sortable" (click)="sortBy('hasVisited')">
+              看房 <span class="sort-icon">{{ sortIcon('hasVisited') }}</span>
+            </th>
+            <th appColResizable *ngIf="isVisible('visitIssue')" class="sortable" (click)="sortBy('visitIssue')">
+              看房問題 <span class="sort-icon">{{ sortIcon('visitIssue') }}</span>
+            </th>
+            <th appColResizable *ngIf="isVisible('discountedTotalPrice')" class="sortable" (click)="sortBy('discountedTotalPrice')">
+              折扣後總價 <span class="sort-icon">{{ sortIcon('discountedTotalPrice') }}</span>
+            </th>
+            <th appColResizable *ngIf="isVisible('discountedPricePerPingWithoutParking')" class="sortable" (click)="sortBy('discountedPricePerPingWithoutParking')">
+              折扣後不含車位每坪 <span class="sort-icon">{{ sortIcon('discountedPricePerPingWithoutParking') }}</span>
+            </th>
+            <th appColResizable *ngIf="isVisible('discountedRegistryDiff')" class="sortable" (click)="sortBy('discountedRegistryDiff')">
+              折扣後 vs 實登 <span class="sort-icon">{{ sortIcon('discountedRegistryDiff') }}</span>
+            </th>
+            <th appColResizable>操作</th>
           </tr>
         </thead>
         <tbody>
@@ -70,16 +118,41 @@
               </a>
               <ng-template #noAddress>-</ng-template>
             </td>
-            <td class="num">{{ house.buildAreaPing ?? '-' }}</td>
-            <td class="num">{{ house.indoorPing ?? '-' }}</td>
-            <td class="num">{{ house.parkingPing ?? '-' }}</td>
-            <td class="num">{{ house.totalPrice | number:'1.0-0' }}</td>
-            <td class="num">{{ house.parkingPrice ? (house.parkingPrice | number:'1.0-0') : '-' }}</td>
-            <td class="num">{{ house.pricePerPingWithoutParking | number:'1.2-2' }}</td>
-            <td class="num">{{ house.houseAgeYear != null ? house.houseAgeYear + '年' : '-' }}</td>
-            <td class="num">{{ house.floor != null ? house.floor + 'F' : '-' }}</td>
-            <td>{{ house.bedroomCount }}房{{ house.livingRoomCount }}廳{{ house.bathroomCount }}衛</td>
-            <td class="num">
+            <td *ngIf="isVisible('buildAreaPing')" class="num">{{ house.buildAreaPing ?? '-' }}</td>
+            <td *ngIf="isVisible('indoorPing')" class="num">{{ house.indoorPing ?? '-' }}</td>
+            <td *ngIf="isVisible('parkingPing')" class="num">{{ house.parkingPing ?? '-' }}</td>
+            <td *ngIf="isVisible('totalPrice')" class="num">{{ house.totalPrice | number:'1.0-0' }}</td>
+            <td *ngIf="isVisible('parkingPrice')" class="num">
+              {{ house.parkingPrice ? (house.parkingPrice | number:'1.0-0') : '-' }}
+            </td>
+            <td *ngIf="isVisible('pricePerPingWithParking')" class="num">
+              {{ house.pricePerPingWithParking | number:'1.2-2' }}
+            </td>
+            <td *ngIf="isVisible('pricePerPingWithoutParking')" class="num">
+              {{ house.pricePerPingWithoutParking | number:'1.2-2' }}
+            </td>
+            <td *ngIf="isVisible('monthlyFee')" class="num">
+              {{ house.monthlyFee ? (house.monthlyFee | number:'1.0-0') : '-' }}
+            </td>
+            <td *ngIf="isVisible('monthlyMortgage')" class="num">
+              {{ house.monthlyMortgage ? (house.monthlyMortgage | number:'1.0-0') : '-' }}
+            </td>
+            <td *ngIf="isVisible('monthlyInterest')" class="num">
+              {{ house.monthlyInterest ? (house.monthlyInterest | number:'1.0-0') : '-' }}
+            </td>
+            <td *ngIf="isVisible('interestToRentRatio')" class="num">
+              {{ house.interestToRentRatio != null ? (house.interestToRentRatio | number:'1.1-1') + '%' : '-' }}
+            </td>
+            <td *ngIf="isVisible('houseAgeYear')" class="num">
+              {{ house.houseAgeYear != null ? house.houseAgeYear + '年' : '-' }}
+            </td>
+            <td *ngIf="isVisible('floor')" class="num">
+              {{ house.floor != null ? house.floor + 'F' : '-' }}
+            </td>
+            <td *ngIf="isVisible('layout')" class="layout">
+              {{ house.bedroomCount }}房{{ house.livingRoomCount }}廳{{ house.bathroomCount }}衛
+            </td>
+            <td *ngIf="isVisible('originalRegistryDiff')" class="num">
               <ng-container *ngIf="originalRegistryDiffPct(house) !== null; else noRegistry1">
                 <span [ngClass]="diffClass(originalRegistryDiffPct(house)!)">
                   {{ originalRegistryDiffPct(house)! > 0 ? '+' : '' }}{{ originalRegistryDiffPct(house) }}%
@@ -87,12 +160,31 @@
               </ng-container>
               <ng-template #noRegistry1>-</ng-template>
             </td>
-            <td class="visited-cell">
+            <td *ngIf="isVisible('hasVisited')" class="visited-cell">
               <span class="visited-badge" [class.visited]="house.hasVisited">
                 {{ house.hasVisited ? '✓' : '—' }}
               </span>
             </td>
-            <td class="num">
+            <td *ngIf="isVisible('visitIssue')" class="visited-cell">
+              <ng-container [ngSwitch]="hasAnyVisitIssue(house)">
+                <span *ngSwitchCase="null" class="visit-issue--none">-</span>
+                <span *ngSwitchCase="true" class="visit-issue--warn">⚠ 有問題</span>
+                <span *ngSwitchCase="false" class="visit-issue--ok">✓</span>
+              </ng-container>
+            </td>
+            <td *ngIf="isVisible('discountedTotalPrice')" class="num">
+              <ng-container *ngIf="discountedTotalPrice(house) !== null; else noDiscount1">
+                {{ discountedTotalPrice(house)! | number:'1.0-0' }}
+              </ng-container>
+              <ng-template #noDiscount1>-</ng-template>
+            </td>
+            <td *ngIf="isVisible('discountedPricePerPingWithoutParking')" class="num">
+              <ng-container *ngIf="discountedPricePerPingWithoutParking(house) !== null; else noDiscount2">
+                {{ discountedPricePerPingWithoutParking(house)! | number:'1.2-2' }}
+              </ng-container>
+              <ng-template #noDiscount2>-</ng-template>
+            </td>
+            <td *ngIf="isVisible('discountedRegistryDiff')" class="num">
               <ng-container *ngIf="discountedRegistryDiffPct(house) !== null; else noRegistry2">
                 <span [ngClass]="diffClass(discountedRegistryDiffPct(house)!)">
                   {{ discountedRegistryDiffPct(house)! > 0 ? '+' : '' }}{{ discountedRegistryDiffPct(house) }}%
@@ -118,14 +210,19 @@
       <table class="table">
         <thead>
           <tr>
-            <th>代號</th>
-            <th>地址</th>
-            <th class="sortable" (click)="sortBy('totalPrice')">
-              總價（萬）<span class="sort-icon">{{ sortIcon('totalPrice') }}</span>
+            <th appColResizable>代號</th>
+            <th appColResizable>地址</th>
+            <th appColResizable class="sortable" (click)="sortBy('totalPrice')">
+              總價 <span class="sort-icon">{{ sortIcon('totalPrice') }}</span>
             </th>
-            <th>看房</th>
-            <th>淘汰原因</th>
-            <th>操作</th>
+            <th appColResizable class="sortable" (click)="sortBy('hasVisited')">
+              看房 <span class="sort-icon">{{ sortIcon('hasVisited') }}</span>
+            </th>
+            <th appColResizable class="sortable" (click)="sortBy('visitIssue')">
+              看房問題 <span class="sort-icon">{{ sortIcon('visitIssue') }}</span>
+            </th>
+            <th appColResizable>淘汰原因</th>
+            <th appColResizable>操作</th>
           </tr>
         </thead>
         <tbody>
@@ -149,6 +246,13 @@
               <span class="visited-badge" [class.visited]="house.hasVisited">
                 {{ house.hasVisited ? '✓' : '—' }}
               </span>
+            </td>
+            <td class="visited-cell">
+              <ng-container [ngSwitch]="hasAnyVisitIssue(house)">
+                <span *ngSwitchCase="null" class="visit-issue--none">-</span>
+                <span *ngSwitchCase="true" class="visit-issue--warn">⚠ 有問題</span>
+                <span *ngSwitchCase="false" class="visit-issue--ok">✓</span>
+              </ng-container>
             </td>
             <td class="reason">{{ house.eliminatedReason }}</td>
             <td class="row-actions">

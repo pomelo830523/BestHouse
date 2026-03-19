@@ -4,16 +4,81 @@ import { RouterLink } from '@angular/router';
 import { HouseService } from '../../../core/services/house.service';
 import { RealPriceService } from '../../../core/services/real-price.service';
 import { House } from '../../../core/models/house.model';
+import { ColResizableDirective } from '../../../core/directives/col-resizable.directive';
 
 type SortableColumn =
-  | 'buildAreaPing' | 'indoorPing' | 'totalPrice'
-  | 'pricePerPingWithoutParking'
-  | 'houseAgeYear' | 'floor';
+  | 'buildAreaPing' | 'indoorPing' | 'parkingPing'
+  | 'totalPrice' | 'parkingPrice' | 'pricePerPingWithParking' | 'pricePerPingWithoutParking'
+  | 'discountedTotalPrice' | 'discountedPricePerPingWithoutParking'
+  | 'monthlyFee' | 'monthlyMortgage' | 'monthlyInterest' | 'interestToRentRatio'
+  | 'houseAgeYear' | 'floor'
+  | 'originalRegistryDiff' | 'discountedRegistryDiff'
+  | 'hasVisited' | 'visitIssue';
+
+type ColumnKey = SortableColumn | 'layout';
+
+const COLUMN_LABELS: Record<ColumnKey, string> = {
+  buildAreaPing: '總坪',
+  indoorPing: '室內坪',
+  parkingPing: '車位坪',
+  totalPrice: '總價',
+  parkingPrice: '車位價',
+  pricePerPingWithParking: '含車位單價',
+  pricePerPingWithoutParking: '不含車位單價',
+  discountedTotalPrice: '折扣後總價',
+  discountedPricePerPingWithoutParking: '折扣後不含車位每坪',
+  monthlyFee: '管理費',
+  monthlyMortgage: '月付房貸',
+  monthlyInterest: '月付利息',
+  interestToRentRatio: '息租比',
+  houseAgeYear: '屋齡',
+  floor: '樓層',
+  layout: '格局',
+  originalRegistryDiff: '開價 vs 實登',
+  discountedRegistryDiff: '折扣後 vs 實登',
+  hasVisited: '看房',
+  visitIssue: '看房問題',
+};
+
+const TOGGLEABLE_COLUMNS: ColumnKey[] = [
+  'buildAreaPing', 'indoorPing', 'parkingPing',
+  'totalPrice', 'parkingPrice', 'pricePerPingWithParking', 'pricePerPingWithoutParking',
+  'discountedTotalPrice', 'discountedPricePerPingWithoutParking',
+  'monthlyFee', 'monthlyMortgage', 'monthlyInterest', 'interestToRentRatio',
+  'houseAgeYear', 'floor', 'layout',
+  'originalRegistryDiff', 'discountedRegistryDiff',
+  'hasVisited', 'visitIssue',
+];
+
+const DEFAULT_VISIBLE: Record<ColumnKey, boolean> = {
+  buildAreaPing: true,
+  indoorPing: true,
+  parkingPing: false,
+  totalPrice: true,
+  parkingPrice: false,
+  pricePerPingWithParking: false,
+  pricePerPingWithoutParking: true,
+  discountedTotalPrice: true,
+  discountedPricePerPingWithoutParking: true,
+  monthlyFee: true,
+  monthlyMortgage: false,
+  monthlyInterest: false,
+  interestToRentRatio: false,
+  houseAgeYear: true,
+  floor: true,
+  layout: true,
+  originalRegistryDiff: true,
+  discountedRegistryDiff: true,
+  hasVisited: true,
+  visitIssue: true,
+};
+
+const STORAGE_KEY = 'besthouse-column-visibility';
 
 @Component({
   selector: 'app-house-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ColResizableDirective],
   templateUrl: './house-list.component.html',
   styleUrls: ['./house-list.component.scss'],
 })
@@ -25,6 +90,11 @@ export class HouseListComponent implements OnInit {
   successMessage = '';
   sortColumn: SortableColumn | null = null;
   sortDirection: 'asc' | 'desc' = 'asc';
+  showColumnPanel = false;
+
+  readonly toggleableColumns = TOGGLEABLE_COLUMNS;
+  readonly columnLabels = COLUMN_LABELS;
+  columnVisible: Record<ColumnKey, boolean> = { ...DEFAULT_VISIBLE };
 
   constructor(
     private houseService: HouseService,
@@ -32,7 +102,37 @@ export class HouseListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.loadColumnVisibility();
     this.loadHouses();
+  }
+
+  private loadColumnVisibility(): void {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as Partial<Record<ColumnKey, boolean>>;
+        this.columnVisible = { ...DEFAULT_VISIBLE, ...parsed };
+      }
+    } catch {
+      // ignore parse errors
+    }
+  }
+
+  private saveColumnVisibility(): void {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.columnVisible));
+    } catch {
+      // ignore storage errors
+    }
+  }
+
+  isVisible(col: ColumnKey): boolean {
+    return this.columnVisible[col];
+  }
+
+  toggleColumn(col: ColumnKey): void {
+    this.columnVisible = { ...this.columnVisible, [col]: !this.columnVisible[col] };
+    this.saveColumnVisibility();
   }
 
   loadHouses(): void {
@@ -115,15 +215,32 @@ export class HouseListComponent implements OnInit {
     return this.sortDirection === 'asc' ? '↑' : '↓';
   }
 
+  private sortValue(house: House, col: SortableColumn): number {
+    switch (col) {
+      case 'discountedTotalPrice':
+        return this.discountedTotalPrice(house) ?? -Infinity;
+      case 'discountedPricePerPingWithoutParking':
+        return this.discountedPricePerPingWithoutParking(house) ?? -Infinity;
+      case 'originalRegistryDiff':
+        return this.originalRegistryDiffPct(house) ?? -Infinity;
+      case 'discountedRegistryDiff':
+        return this.discountedRegistryDiffPct(house) ?? -Infinity;
+      case 'hasVisited':
+        return house.hasVisited ? 1 : 0;
+      case 'visitIssue': {
+        const issue = this.hasAnyVisitIssue(house);
+        return issue === null ? -1 : issue ? 1 : 0;
+      }
+      default:
+        return (house as any)[col] ?? -Infinity;
+    }
+  }
+
   private sortedHouses(list: House[]): House[] {
     if (!this.sortColumn) return list;
     const col = this.sortColumn;
     const dir = this.sortDirection === 'asc' ? 1 : -1;
-    return [...list].sort((a, b) => {
-      const aVal = (a as any)[col] ?? -Infinity;
-      const bVal = (b as any)[col] ?? -Infinity;
-      return (aVal - bVal) * dir;
-    });
+    return [...list].sort((a, b) => (this.sortValue(a, col) - this.sortValue(b, col)) * dir);
   }
 
   get activeHouses(): House[] {
@@ -148,9 +265,40 @@ export class HouseListComponent implements OnInit {
     return +((discounted - house.estimatedRegistryPrice) / house.estimatedRegistryPrice * 100).toFixed(1);
   }
 
-  /** @deprecated 相容舊版，改用 originalRegistryDiffPct / discountedRegistryDiffPct */
-  registryDiffPct(house: House): number | null {
-    return this.originalRegistryDiffPct(house);
+  /** 折扣後總價（無折扣時回 null） */
+  discountedTotalPrice(house: House): number | null {
+    if (!house.discountPercent || house.discountPercent <= 0) return null;
+    return +(house.totalPrice * (1 - house.discountPercent / 100)).toFixed(1);
+  }
+
+  /** 折扣後不含車位每坪（無折扣或無建坪時回 null） */
+  discountedPricePerPingWithoutParking(house: House): number | null {
+    const discounted = this.discountedTotalPrice(house);
+    if (discounted === null) return null;
+    if (!house.buildAreaPing || house.buildAreaPing <= 0) return null;
+    return +((discounted - (house.parkingPrice ?? 0)) / house.buildAreaPing).toFixed(2);
+  }
+
+  /**
+   * 看房評估是否有任何問題。
+   * 未看房回 null；已看房則檢查各評估欄位是否有異常值。
+   */
+  hasAnyVisitIssue(house: House): boolean | null {
+    if (!house.hasVisited) return null;
+    const issues = [
+      house.hasMoldOrLeak === true,
+      house.isFloorLevelOk === false,
+      house.isDoorWindowOk === false,
+      house.isWaterPressureOk === false,
+      house.isHaunted === true,
+      house.isSeaSand === true,
+      house.isRadiation === true,
+      house.hasIllegalConstruction === true,
+      house.hasNuisanceFacility === true,
+      house.isManagementOk === false,
+      house.floodRisk === 'HIGH',
+    ];
+    return issues.some(Boolean);
   }
 
   mapsUrl(address: string): string {
