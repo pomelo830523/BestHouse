@@ -1,7 +1,8 @@
 <nav class="navbar">
   <div class="navbar__brand">🏠 BestHouse</div>
   <ul class="navbar__links">
-    <li><a routerLink="/houses" routerLinkActive="active">房屋列表</a></li>
+    <li><a routerLink="/houses" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">房屋列表</a></li>
+    <li><a routerLink="/houses/map" routerLinkActive="active">地圖</a></li>
     <li><a routerLink="/ranking" routerLinkActive="active">排名總覽</a></li>
     <li><a routerLink="/filter-rules" routerLinkActive="active">篩選條件</a></li>
     <li><a routerLink="/house-tips" routerLinkActive="active">看房心法</a></li>

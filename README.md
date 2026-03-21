@@ -5,6 +5,7 @@
 ## 功能
 
 - **房屋列表**：新增、編輯、刪除房屋，即時計算單價、折扣後總價與每坪、折扣後不含車位每坪、貸款月付與租買比較；顯示開價與折扣後 vs 實價登錄差距；欄位可排序、可自由顯示/隱藏（設定存於 localStorage）、可拖拉調整欄位寬度
+- **房屋地圖**：將所有房屋地址地理編碼並在 Google Maps 標記，點擊 marker 可查看名稱、地址、開價與折扣資訊；可切換顯示/隱藏已淘汰物件
 - **評分系統**：多維度家庭評分、加權排名
 - **篩選條件**：自訂規則自動淘汰不符條件的房屋
 - **看房評估**：記錄現場狀況（壁癌、海砂、兇宅等），列表直接顯示是否有任何問題項目
@@ -24,6 +25,7 @@
 | 資料庫 | MariaDB 11（Docker） |
 | DB Migration | Flyway |
 | AI | Google Gemini API |
+| 地圖 | Google Maps JavaScript API |
 | 本機連線 | Tailscale VPN |
 
 ---
@@ -47,13 +49,32 @@ docker compose up -d
 到 [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) 取得免費 API Key，
 建立 `application-local.yml`（此檔不會上傳 git）：
 
-```bash
+```yaml
 # besthouse-backend/src/main/resources/application-local.yml
 gemini:
   api-key: 你的-gemini-api-key
 ```
 
-### 3. 啟動後端
+### 3. 設定 Google Maps API Key
+
+到 [Google Cloud Console](https://console.cloud.google.com/) 建立 API Key，並啟用以下兩個 API：
+- **Maps JavaScript API**
+- **Geocoding API**
+
+將 Key 填入前端 environment 檔（此檔已設為 `skip-worktree`，本地變更不會被 git 追蹤）：
+
+```typescript
+// besthouse-frontend/src/environments/environment.ts
+export const environment = {
+  production: false,
+  apiUrl: '',
+  googleMapsApiKey: '你的-google-maps-api-key',
+};
+```
+
+> **注意**：`environment.ts` 已透過 `git update-index --skip-worktree` 設定，填入 Key 後不會意外上傳至 GitHub。
+
+### 4. 啟動後端
 
 ```bash
 cd besthouse-backend
@@ -62,7 +83,7 @@ mvn spring-boot:run
 
 後端運行於 `http://localhost:8080`
 
-### 4. 啟動前端
+### 5. 啟動前端
 
 ```bash
 cd besthouse-frontend
@@ -156,3 +177,5 @@ Flyway 自動執行，版本如下：
 | V9 | 新增 monthlyRent（每月租金） |
 | V10 | 新增 REAL_PRICE_RECORD 表（實價登錄） |
 | V11 | REAL_PRICE_RECORD 新增 parkingAreaPing（車位坪） |
+| V12 | REAL_PRICE_RECORD 新增 LAT / LNG（地理編碼座標，已廢棄） |
+| V13 | 移除 LAT / LNG 欄位 |

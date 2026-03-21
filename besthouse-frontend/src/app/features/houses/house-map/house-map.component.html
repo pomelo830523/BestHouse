@@ -1,0 +1,40 @@
+<div class="page-header">
+  <h2>房屋地圖</h2>
+  <a class="btn btn--outline btn--sm" routerLink="/houses">← 返回列表</a>
+</div>
+
+<div *ngIf="errorMessage" class="alert alert--error">{{ errorMessage }}</div>
+
+<div class="map-layout">
+
+  <!-- 工具列 -->
+  <div class="toolbar" *ngIf="!isLoading && !errorMessage">
+    <button class="btn btn--outline btn--sm"
+            [class.btn--active]="showEliminated"
+            (click)="toggleEliminated()">
+      {{ showEliminated ? '隱藏已淘汰' : '顯示已淘汰' }}
+    </button>
+    <span class="legend"><span class="dot dot--active"></span> 有效</span>
+    <span class="legend" *ngIf="showEliminated"><span class="dot dot--eliminated"></span> 已淘汰</span>
+    <span class="status-text" *ngIf="geocodedCount < totalWithAddress">
+      定位中 {{ geocodedCount }} / {{ totalWithAddress }}…
+    </span>
+    <span class="status-text" *ngIf="geocodedCount === totalWithAddress && totalWithAddress > 0">
+      已標示 {{ geocodedCount }} / {{ totalWithAddress }} 間
+    </span>
+    <span class="warn-text" *ngIf="noAddressHouses.length > 0">
+      無地址未標示：{{ noAddressHouses.length }} 間
+    </span>
+  </div>
+
+  <!-- 地圖（永遠在 DOM 中） -->
+  <div #mapContainer class="map-container" [class.map-loading]="isLoading" [hidden]="!!errorMessage"></div>
+
+  <!-- 無地址清單 -->
+  <div class="no-address-list"
+       *ngIf="!isLoading && !errorMessage && noAddressHouses.length > 0">
+    <span class="no-address-list__title">無地址（未標示）：</span>
+    <span *ngFor="let h of noAddressHouses" class="tag">{{ h.nickname }}</span>
+  </div>
+
+</div>

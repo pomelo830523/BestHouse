@@ -18,6 +18,11 @@ export const routes: Routes = [
       import('./features/houses/house-form/house-form.component').then(m => m.HouseFormComponent),
   },
   {
+    path: 'houses/map',
+    loadComponent: () =>
+      import('./features/houses/house-map/house-map.component').then(m => m.HouseMapComponent),
+  },
+  {
     path: 'houses/:houseId/rate',
     loadComponent: () =>
       import('./features/houses/house-rate/house-rate.component').then(m => m.HouseRateComponent),
