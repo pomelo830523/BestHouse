@@ -133,6 +133,9 @@ public class House {
     @Column(name = "HAS_ILLEGAL_CONSTRUCTION")
     private Boolean hasIllegalConstruction;
 
+    @Column(name = "IS_PARKING_LOWEST_FLOOR")
+    private Boolean isParkingLowestFloor;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "FLOOD_RISK", columnDefinition = "VARCHAR(20)")
     private FloodRisk floodRisk;
@@ -145,6 +148,9 @@ public class House {
 
     @Column(name = "IS_MANAGEMENT_OK")
     private Boolean isManagementOk;
+
+    @Column(name = "MANAGEMENT_NOTE", columnDefinition = "TEXT")
+    private String managementNote;
 
     @Column(name = "VISIT_DATE")
     private LocalDate visitDate;

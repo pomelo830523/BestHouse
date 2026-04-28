@@ -62,10 +62,12 @@ public class HouseDto {
     private Boolean isSeaSand;
     private Boolean isRadiation;
     private Boolean hasIllegalConstruction;
+    private Boolean isParkingLowestFloor;
     private FloodRisk floodRisk;
     private Boolean hasNuisanceFacility;
     private String nuisanceFacilityNote;
     private Boolean isManagementOk;
+    private String managementNote;
     private LocalDate visitDate;
     private String visitImpression;
 }

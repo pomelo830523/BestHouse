@@ -408,6 +408,14 @@
         </select>
       </div>
       <div class="form-group">
+        <label>車位在地下最下層</label>
+        <select formControlName="isParkingLowestFloor">
+          <option value="">未查</option>
+          <option value="false">否</option>
+          <option value="true">是（淹水風險較高）</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label>淹水風險</label>
         <select formControlName="floodRisk">
           <option value="">未查</option>
@@ -428,7 +436,7 @@
       </div>
       <div class="form-group form-group--full">
         <label>嫌惡設施說明</label>
-        <input formControlName="nuisanceFacilityNote" placeholder="例：200m 內有宮廟" />
+        <input formControlName="nuisanceFacilityNote" placeholder="例：宮廟、殯儀館、加油站、高壓電塔、垃圾場、屠宰場、鄰居走廊是否堆放雜物、車位旁是否有雜物" />
       </div>
       <div class="form-group">
         <label>管委會正常運作</label>
@@ -437,6 +445,10 @@
           <option value="true">正常</option>
           <option value="false">有疑慮</option>
         </select>
+      </div>
+      <div class="form-group form-group--full">
+        <label>管委會疑慮說明</label>
+        <input formControlName="managementNote" placeholder="例：電梯維護記錄、管理費欠費催繳、公設維護差、住戶糾紛多" />
       </div>
     </div>
 

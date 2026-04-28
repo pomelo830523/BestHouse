@@ -64,10 +64,12 @@ export interface House {
   isSeaSand: boolean | null;
   isRadiation: boolean | null;
   hasIllegalConstruction: boolean | null;
+  isParkingLowestFloor: boolean | null;
   floodRisk: FloodRisk | null;
   hasNuisanceFacility: boolean | null;
   nuisanceFacilityNote: string | null;
   isManagementOk: boolean | null;
+  managementNote: string | null;
   visitDate: string | null;
   visitImpression: string | null;
 }

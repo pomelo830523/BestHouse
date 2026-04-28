@@ -89,10 +89,12 @@ public class HouseService {
         house.setIsSeaSand(dto.getIsSeaSand());
         house.setIsRadiation(dto.getIsRadiation());
         house.setHasIllegalConstruction(dto.getHasIllegalConstruction());
+        house.setIsParkingLowestFloor(dto.getIsParkingLowestFloor());
         house.setFloodRisk(dto.getFloodRisk());
         house.setHasNuisanceFacility(dto.getHasNuisanceFacility());
         house.setNuisanceFacilityNote(dto.getNuisanceFacilityNote());
         house.setIsManagementOk(dto.getIsManagementOk());
+        house.setManagementNote(dto.getManagementNote());
         house.setVisitDate(dto.getVisitDate());
         house.setVisitImpression(dto.getVisitImpression());
 
@@ -174,10 +176,12 @@ public class HouseService {
                 .isSeaSand(house.getIsSeaSand())
                 .isRadiation(house.getIsRadiation())
                 .hasIllegalConstruction(house.getHasIllegalConstruction())
+                .isParkingLowestFloor(house.getIsParkingLowestFloor())
                 .floodRisk(house.getFloodRisk())
                 .hasNuisanceFacility(house.getHasNuisanceFacility())
                 .nuisanceFacilityNote(house.getNuisanceFacilityNote())
                 .isManagementOk(house.getIsManagementOk())
+                .managementNote(house.getManagementNote())
                 .visitDate(house.getVisitDate())
                 .visitImpression(house.getVisitImpression())
                 .build();
@@ -217,10 +221,12 @@ public class HouseService {
                 .isSeaSand(dto.getIsSeaSand())
                 .isRadiation(dto.getIsRadiation())
                 .hasIllegalConstruction(dto.getHasIllegalConstruction())
+                .isParkingLowestFloor(dto.getIsParkingLowestFloor())
                 .floodRisk(dto.getFloodRisk())
                 .hasNuisanceFacility(dto.getHasNuisanceFacility())
                 .nuisanceFacilityNote(dto.getNuisanceFacilityNote())
                 .isManagementOk(dto.getIsManagementOk())
+                .managementNote(dto.getManagementNote())
                 .visitDate(dto.getVisitDate())
                 .visitImpression(dto.getVisitImpression())
                 .status(HouseStatus.ACTIVE)

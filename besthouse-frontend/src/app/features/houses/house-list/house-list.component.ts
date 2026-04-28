@@ -7,7 +7,7 @@ import { House } from '../../../core/models/house.model';
 import { ColResizableDirective } from '../../../core/directives/col-resizable.directive';
 
 type SortableColumn =
-  | 'buildAreaPing' | 'indoorPing' | 'parkingPing'
+  | 'buildAreaPing' | 'indoorPing' | 'parkingPing' | 'commonAreaRatio'
   | 'totalPrice' | 'parkingPrice' | 'pricePerPingWithParking' | 'pricePerPingWithoutParking'
   | 'discountedTotalPrice' | 'discountedPricePerPingWithoutParking'
   | 'monthlyFee' | 'monthlyMortgage' | 'monthlyInterest' | 'interestToRentRatio'
@@ -21,6 +21,7 @@ const COLUMN_LABELS: Record<ColumnKey, string> = {
   buildAreaPing: '總坪',
   indoorPing: '室內坪',
   parkingPing: '車位坪',
+  commonAreaRatio: '公設比',
   totalPrice: '總價',
   parkingPrice: '車位價',
   pricePerPingWithParking: '含車位單價',
@@ -41,7 +42,7 @@ const COLUMN_LABELS: Record<ColumnKey, string> = {
 };
 
 const TOGGLEABLE_COLUMNS: ColumnKey[] = [
-  'buildAreaPing', 'indoorPing', 'parkingPing',
+  'buildAreaPing', 'indoorPing', 'parkingPing', 'commonAreaRatio',
   'totalPrice', 'parkingPrice', 'pricePerPingWithParking', 'pricePerPingWithoutParking',
   'discountedTotalPrice', 'discountedPricePerPingWithoutParking',
   'monthlyFee', 'monthlyMortgage', 'monthlyInterest', 'interestToRentRatio',
@@ -54,6 +55,7 @@ const DEFAULT_VISIBLE: Record<ColumnKey, boolean> = {
   buildAreaPing: true,
   indoorPing: true,
   parkingPing: false,
+  commonAreaRatio: true,
   totalPrice: true,
   parkingPrice: false,
   pricePerPingWithParking: false,
@@ -217,6 +219,8 @@ export class HouseListComponent implements OnInit {
 
   private sortValue(house: House, col: SortableColumn): number {
     switch (col) {
+      case 'commonAreaRatio':
+        return this.commonAreaRatio(house) ?? -Infinity;
       case 'discountedTotalPrice':
         return this.discountedTotalPrice(house) ?? -Infinity;
       case 'discountedPricePerPingWithoutParking':
@@ -249,6 +253,13 @@ export class HouseListComponent implements OnInit {
 
   get eliminatedHouses(): House[] {
     return this.sortedHouses(this.houses.filter(h => h.status === 'ELIMINATED'));
+  }
+
+  /** 公設比 = (總坪 - 室內坪 - 車位坪) / 總坪 × 100（車位視為獨立產權，不算公設） */
+  commonAreaRatio(house: House): number | null {
+    if (!house.buildAreaPing || house.buildAreaPing <= 0 || house.indoorPing == null) return null;
+    const parkingPing = house.parkingPing ?? 0;
+    return +((house.buildAreaPing - house.indoorPing - parkingPing) / house.buildAreaPing * 100).toFixed(1);
   }
 
   /** 開價 vs 實價登錄 */
@@ -294,6 +305,7 @@ export class HouseListComponent implements OnInit {
       house.isSeaSand === true,
       house.isRadiation === true,
       house.hasIllegalConstruction === true,
+      house.isParkingLowestFloor === true,
       house.hasNuisanceFacility === true,
       house.isManagementOk === false,
       house.floodRisk === 'HIGH',

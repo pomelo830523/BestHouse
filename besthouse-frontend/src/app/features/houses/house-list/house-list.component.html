@@ -47,6 +47,9 @@
             <th appColResizable *ngIf="isVisible('indoorPing')" class="sortable" (click)="sortBy('indoorPing')">
               室內坪 <span class="sort-icon">{{ sortIcon('indoorPing') }}</span>
             </th>
+            <th appColResizable *ngIf="isVisible('commonAreaRatio')" class="sortable" (click)="sortBy('commonAreaRatio')">
+              公設比 <span class="sort-icon">{{ sortIcon('commonAreaRatio') }}</span>
+            </th>
             <th appColResizable *ngIf="isVisible('parkingPing')" class="sortable" (click)="sortBy('parkingPing')">
               車位坪 <span class="sort-icon">{{ sortIcon('parkingPing') }}</span>
             </th>
@@ -120,6 +123,9 @@
             </td>
             <td *ngIf="isVisible('buildAreaPing')" class="num">{{ house.buildAreaPing ?? '-' }}</td>
             <td *ngIf="isVisible('indoorPing')" class="num">{{ house.indoorPing ?? '-' }}</td>
+            <td *ngIf="isVisible('commonAreaRatio')" class="num">
+              {{ commonAreaRatio(house) !== null ? (commonAreaRatio(house)! | number:'1.1-1') + '%' : '-' }}
+            </td>
             <td *ngIf="isVisible('parkingPing')" class="num">{{ house.parkingPing ?? '-' }}</td>
             <td *ngIf="isVisible('totalPrice')" class="num">{{ house.totalPrice | number:'1.0-0' }}</td>
             <td *ngIf="isVisible('parkingPrice')" class="num">
