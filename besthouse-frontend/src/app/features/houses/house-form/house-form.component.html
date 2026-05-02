@@ -46,6 +46,78 @@
     </div>
   </section>
 
+  <!-- 交通與學區 -->
+  <section class="form-section">
+    <h3 class="form-section__title">交通與學區</h3>
+
+    <h4 class="form-section__subtitle">
+      交通（往竹北高鐵 / 新竹火車站）
+      <small class="hint-inline">🗺️ 連結用大眾運輸＋下一個工作日早上 9 點</small>
+    </h4>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>
+          步行至竹北高鐵（公尺）
+          <a *ngIf="transitDirUrl('竹北高鐵站') as url" [href]="url"
+             target="_blank" rel="noopener" class="map-link">🗺️ 查路線</a>
+        </label>
+        <input type="number" formControlName="walkMetersToHsrZhubei" min="0"
+               placeholder="例：50（含轉乘起點）" />
+      </div>
+      <div class="form-group">
+        <label>最近站名</label>
+        <input formControlName="nearestStationToHsrZhubei" placeholder="例：新莊火車站" />
+      </div>
+      <div class="form-group">
+        <label>
+          步行至新竹火車站（公尺）
+          <a *ngIf="transitDirUrl('新竹火車站') as url" [href]="url"
+             target="_blank" rel="noopener" class="map-link">🗺️ 查路線</a>
+        </label>
+        <input type="number" formControlName="walkMetersToFengyuan" min="0" placeholder="例：800" />
+      </div>
+      <div class="form-group">
+        <label>最近站名</label>
+        <input formControlName="nearestStationToFengyuan" placeholder="例：新竹火車站" />
+      </div>
+    </div>
+
+    <h4 class="form-section__subtitle">
+      學區（國小 / 國中，多校取最近）
+      <small class="hint-inline">填校名後 🗺️ 連結會出現，直接查地址→校名大眾運輸路線</small>
+    </h4>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>
+          步行至最近國小（公尺）
+          <a *ngIf="transitDirUrl(fieldValue('nearestElementarySchool')) as url" [href]="url"
+             target="_blank" rel="noopener" class="map-link">🗺️ 查路線</a>
+        </label>
+        <input type="number" formControlName="walkMetersToElementary" min="0" placeholder="例：550" />
+      </div>
+      <div class="form-group">
+        <label>國小校名</label>
+        <input formControlName="nearestElementarySchool" placeholder="例：關東國小（先填這裡）" />
+      </div>
+      <div class="form-group">
+        <label>
+          步行至最近國中（公尺）
+          <a *ngIf="transitDirUrl(fieldValue('nearestJuniorHighSchool')) as url" [href]="url"
+             target="_blank" rel="noopener" class="map-link">🗺️ 查路線</a>
+        </label>
+        <input type="number" formControlName="walkMetersToJuniorHigh" min="0" placeholder="例：1000" />
+      </div>
+      <div class="form-group">
+        <label>國中校名</label>
+        <input formControlName="nearestJuniorHighSchool" placeholder="例：新科國中（先填這裡）" />
+      </div>
+    </div>
+
+    <p class="address-warn" *ngIf="!form.get('address')?.value">
+      ⚠️ 先填上方「地址」才會出現 🗺️ 路線連結
+    </p>
+  </section>
+
   <!-- 坪數與格局 -->
   <section class="form-section">
     <h3 class="form-section__title">坪數與格局</h3>
@@ -332,6 +404,25 @@
   <!-- 看房評估（僅編輯模式） -->
   <section class="form-section" *ngIf="isEditMode">
     <h3 class="form-section__title">看房評估</h3>
+
+    <h4 class="form-section__subtitle">大樓配置（需實地確認）</h4>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>每層戶數</label>
+        <input type="number" formControlName="unitsPerFloor" min="1" placeholder="例：4" />
+      </div>
+      <div class="form-group">
+        <label>電梯數</label>
+        <input type="number" formControlName="elevatorCount" min="1" placeholder="例：2" />
+      </div>
+      <div class="form-group" *ngIf="householdsPerElevator !== null">
+        <label>戶/梯比（自動計算）</label>
+        <div class="readonly-value">
+          {{ householdsPerElevator }}
+          <small>（≤2 佳、3 普通、≥4 等電梯壓力大）</small>
+        </div>
+      </div>
+    </div>
 
     <h4 class="form-section__subtitle">現場狀況</h4>
     <div class="form-grid">

@@ -150,7 +150,104 @@ public class FilterService {
                 }
                 yield null;
             }
+            case MAX_WALK_METERS_TO_HSR_ZHUBEI -> {
+                if (rule.getNumValue() == null || house.getWalkMetersToHsrZhubei() == null) {
+                    yield null;
+                }
+                int actual = house.getWalkMetersToHsrZhubei();
+                if (BigDecimal.valueOf(actual).compareTo(rule.getNumValue()) > 0) {
+                    yield String.format("步行至竹北高鐵 %d 公尺超過上限 %d 公尺",
+                            actual, rule.getNumValue().intValue());
+                }
+                yield null;
+            }
+            case MAX_WALK_METERS_TO_FENGYUAN -> {
+                if (rule.getNumValue() == null || house.getWalkMetersToFengyuan() == null) {
+                    yield null;
+                }
+                int actual = house.getWalkMetersToFengyuan();
+                if (BigDecimal.valueOf(actual).compareTo(rule.getNumValue()) > 0) {
+                    yield String.format("步行至新竹火車站 %d 公尺超過上限 %d 公尺",
+                            actual, rule.getNumValue().intValue());
+                }
+                yield null;
+            }
+            case MAX_WALK_METERS_TO_ELEMENTARY -> {
+                if (rule.getNumValue() == null || house.getWalkMetersToElementary() == null) {
+                    yield null;
+                }
+                int actual = house.getWalkMetersToElementary();
+                if (BigDecimal.valueOf(actual).compareTo(rule.getNumValue()) > 0) {
+                    String name = house.getNearestElementarySchool() != null
+                            ? house.getNearestElementarySchool() : "最近國小";
+                    yield String.format("步行至%s %d 公尺超過上限 %d 公尺",
+                            name, actual, rule.getNumValue().intValue());
+                }
+                yield null;
+            }
+            case MAX_WALK_METERS_TO_JUNIOR_HIGH -> {
+                if (rule.getNumValue() == null || house.getWalkMetersToJuniorHigh() == null) {
+                    yield null;
+                }
+                int actual = house.getWalkMetersToJuniorHigh();
+                if (BigDecimal.valueOf(actual).compareTo(rule.getNumValue()) > 0) {
+                    String name = house.getNearestJuniorHighSchool() != null
+                            ? house.getNearestJuniorHighSchool() : "最近國中";
+                    yield String.format("步行至%s %d 公尺超過上限 %d 公尺",
+                            name, actual, rule.getNumValue().intValue());
+                }
+                yield null;
+            }
+            case EXCLUDE_VISIT_ISSUES -> {
+                if (!Boolean.TRUE.equals(house.getHasVisited())) {
+                    yield null;
+                }
+                List<String> issues = collectVisitIssues(house);
+                if (issues.isEmpty()) {
+                    yield null;
+                }
+                yield "看房問題：" + String.join("、", issues);
+            }
+            case MAX_HOUSEHOLD_PER_ELEVATOR_RATIO -> {
+                if (rule.getNumValue() == null) {
+                    yield null;
+                }
+                Integer units = house.getUnitsPerFloor();
+                Integer elevators = house.getElevatorCount();
+                // 任一欄位未填則跳過判斷（避免誤殺資料不全的房屋）
+                if (units == null || elevators == null || elevators <= 0) {
+                    yield null;
+                }
+                BigDecimal ratio = BigDecimal.valueOf(units)
+                        .divide(BigDecimal.valueOf(elevators), 2, RoundingMode.HALF_UP);
+                if (ratio.compareTo(rule.getNumValue()) > 0) {
+                    yield String.format("戶/梯比 %.2f（%d 戶 / %d 梯）超過上限 %.2f",
+                            ratio, units, elevators, rule.getNumValue());
+                }
+                yield null;
+            }
         };
+    }
+
+    /**
+     * 收集房屋已勾選為 NG 的看房問題清單。
+     * 對應前端 hasAnyVisitIssue 的 12 項判斷。
+     */
+    private List<String> collectVisitIssues(House house) {
+        List<String> issues = new ArrayList<>();
+        if (Boolean.TRUE.equals(house.getHasMoldOrLeak())) issues.add("發霉/漏水");
+        if (Boolean.FALSE.equals(house.getIsFloorLevelOk())) issues.add("地板不平");
+        if (Boolean.FALSE.equals(house.getIsDoorWindowOk())) issues.add("門窗異常");
+        if (Boolean.FALSE.equals(house.getIsWaterPressureOk())) issues.add("水壓異常");
+        if (Boolean.TRUE.equals(house.getIsHaunted())) issues.add("凶宅");
+        if (Boolean.TRUE.equals(house.getIsSeaSand())) issues.add("海砂屋");
+        if (Boolean.TRUE.equals(house.getIsRadiation())) issues.add("輻射屋");
+        if (Boolean.TRUE.equals(house.getHasIllegalConstruction())) issues.add("違建");
+        if (Boolean.TRUE.equals(house.getIsParkingLowestFloor())) issues.add("車位最低層");
+        if (Boolean.TRUE.equals(house.getHasNuisanceFacility())) issues.add("嫌惡設施");
+        if (Boolean.FALSE.equals(house.getIsManagementOk())) issues.add("管理委員會NG");
+        if (house.getFloodRisk() == com.besthouse.entity.enums.FloodRisk.HIGH) issues.add("淹水高風險");
+        return issues;
     }
 
     private BigDecimal calcPricePerPingWithoutParking(House house) {

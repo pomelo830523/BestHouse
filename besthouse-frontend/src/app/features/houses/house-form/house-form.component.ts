@@ -79,6 +79,16 @@ export class HouseFormComponent implements OnInit {
       houseAgeYear: [null],
       floor: [null],
       totalFloor: [null],
+      unitsPerFloor: [null],
+      elevatorCount: [null],
+      walkMetersToHsrZhubei: [null],
+      nearestStationToHsrZhubei: [''],
+      walkMetersToFengyuan: [null],
+      nearestStationToFengyuan: [''],
+      walkMetersToElementary: [null],
+      nearestElementarySchool: [''],
+      walkMetersToJuniorHigh: [null],
+      nearestJuniorHighSchool: [''],
       buildAreaPing: [null, [Validators.min(0.01)]],
       indoorPing: [null, [Validators.min(0.01)]],
       bedroomCount: [null],
@@ -127,6 +137,16 @@ export class HouseFormComponent implements OnInit {
           houseAgeYear: house.houseAgeYear,
           floor: house.floor,
           totalFloor: house.totalFloor,
+          unitsPerFloor: house.unitsPerFloor,
+          elevatorCount: house.elevatorCount,
+          walkMetersToHsrZhubei: house.walkMetersToHsrZhubei,
+          nearestStationToHsrZhubei: house.nearestStationToHsrZhubei ?? '',
+          walkMetersToFengyuan: house.walkMetersToFengyuan,
+          nearestStationToFengyuan: house.nearestStationToFengyuan ?? '',
+          walkMetersToElementary: house.walkMetersToElementary,
+          nearestElementarySchool: house.nearestElementarySchool ?? '',
+          walkMetersToJuniorHigh: house.walkMetersToJuniorHigh,
+          nearestJuniorHighSchool: house.nearestJuniorHighSchool ?? '',
           buildAreaPing: house.buildAreaPing,
           indoorPing: house.indoorPing,
           bedroomCount: house.bedroomCount,
@@ -260,6 +280,54 @@ export class HouseFormComponent implements OnInit {
     return '';
   }
 
+  /** 戶/梯比 = 每層戶數 / 電梯數，僅當兩者都 > 0 時計算 */
+  get householdsPerElevator(): number | null {
+    const units: number = +this.form?.get('unitsPerFloor')?.value || 0;
+    const elevators: number = +this.form?.get('elevatorCount')?.value || 0;
+    if (units <= 0 || elevators <= 0) return null;
+    return +(units / elevators).toFixed(2);
+  }
+
+  /**
+   * 下一個工作日早上 9 點的 unix timestamp（秒）。
+   * 用於 Google Maps 大眾運輸路線的 departure_time 參數，避免遇到週末班次稀少。
+   */
+  private nextWeekday9amTimestamp(): number {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    while (d.getDay() === 0 || d.getDay() === 6) {
+      d.setDate(d.getDate() + 1);
+    }
+    d.setHours(9, 0, 0, 0);
+    return Math.floor(d.getTime() / 1000);
+  }
+
+  /** 取得起點地址，若空白回 null */
+  private get currentAddress(): string | null {
+    const addr = (this.form?.get('address')?.value ?? '').trim();
+    return addr.length > 0 ? addr : null;
+  }
+
+  /** Google Maps 大眾運輸路線 URL（早上 9 點出發）；地址或目的地空白回 null */
+  transitDirUrl(destination: string | null | undefined): string | null {
+    const dest = (destination ?? '').trim();
+    const origin = this.currentAddress;
+    if (!origin || !dest) return null;
+    const params = new URLSearchParams({
+      api: '1',
+      origin,
+      destination: dest,
+      travelmode: 'transit',
+      departure_time: this.nextWeekday9amTimestamp().toString(),
+    });
+    return `https://www.google.com/maps/dir/?${params.toString()}`;
+  }
+
+  /** 取得目前 form 內某欄位字串（給 template 簡化使用） */
+  fieldValue(name: string): string {
+    return this.form?.get(name)?.value ?? '';
+  }
+
   submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -277,6 +345,16 @@ export class HouseFormComponent implements OnInit {
       houseAgeYear: raw.houseAgeYear || undefined,
       floor: raw.floor || undefined,
       totalFloor: raw.totalFloor || undefined,
+      unitsPerFloor: raw.unitsPerFloor || undefined,
+      elevatorCount: raw.elevatorCount || undefined,
+      walkMetersToHsrZhubei: raw.walkMetersToHsrZhubei || undefined,
+      nearestStationToHsrZhubei: raw.nearestStationToHsrZhubei || undefined,
+      walkMetersToFengyuan: raw.walkMetersToFengyuan || undefined,
+      nearestStationToFengyuan: raw.nearestStationToFengyuan || undefined,
+      walkMetersToElementary: raw.walkMetersToElementary || undefined,
+      nearestElementarySchool: raw.nearestElementarySchool || undefined,
+      walkMetersToJuniorHigh: raw.walkMetersToJuniorHigh || undefined,
+      nearestJuniorHighSchool: raw.nearestJuniorHighSchool || undefined,
       buildAreaPing: raw.buildAreaPing || undefined,
       indoorPing: raw.indoorPing || undefined,
       bedroomCount: raw.bedroomCount || undefined,

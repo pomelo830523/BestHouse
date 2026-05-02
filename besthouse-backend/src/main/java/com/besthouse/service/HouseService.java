@@ -64,6 +64,16 @@ public class HouseService {
         house.setHouseAgeYear(dto.getHouseAgeYear());
         house.setFloor(dto.getFloor());
         house.setTotalFloor(dto.getTotalFloor());
+        house.setUnitsPerFloor(dto.getUnitsPerFloor());
+        house.setElevatorCount(dto.getElevatorCount());
+        house.setWalkMetersToHsrZhubei(dto.getWalkMetersToHsrZhubei());
+        house.setNearestStationToHsrZhubei(dto.getNearestStationToHsrZhubei());
+        house.setWalkMetersToFengyuan(dto.getWalkMetersToFengyuan());
+        house.setNearestStationToFengyuan(dto.getNearestStationToFengyuan());
+        house.setWalkMetersToElementary(dto.getWalkMetersToElementary());
+        house.setNearestElementarySchool(dto.getNearestElementarySchool());
+        house.setWalkMetersToJuniorHigh(dto.getWalkMetersToJuniorHigh());
+        house.setNearestJuniorHighSchool(dto.getNearestJuniorHighSchool());
         house.setBuildAreaPing(dto.getBuildAreaPing());
         house.setIndoorPing(dto.getIndoorPing());
         house.setBedroomCount(dto.getBedroomCount());
@@ -142,6 +152,16 @@ public class HouseService {
                 .houseAgeYear(house.getHouseAgeYear())
                 .floor(house.getFloor())
                 .totalFloor(house.getTotalFloor())
+                .unitsPerFloor(house.getUnitsPerFloor())
+                .elevatorCount(house.getElevatorCount())
+                .walkMetersToHsrZhubei(house.getWalkMetersToHsrZhubei())
+                .nearestStationToHsrZhubei(house.getNearestStationToHsrZhubei())
+                .walkMetersToFengyuan(house.getWalkMetersToFengyuan())
+                .nearestStationToFengyuan(house.getNearestStationToFengyuan())
+                .walkMetersToElementary(house.getWalkMetersToElementary())
+                .nearestElementarySchool(house.getNearestElementarySchool())
+                .walkMetersToJuniorHigh(house.getWalkMetersToJuniorHigh())
+                .nearestJuniorHighSchool(house.getNearestJuniorHighSchool())
                 .buildAreaPing(house.getBuildAreaPing())
                 .indoorPing(house.getIndoorPing())
                 .bedroomCount(house.getBedroomCount())
@@ -196,6 +216,16 @@ public class HouseService {
                 .houseAgeYear(dto.getHouseAgeYear())
                 .floor(dto.getFloor())
                 .totalFloor(dto.getTotalFloor())
+                .unitsPerFloor(dto.getUnitsPerFloor())
+                .elevatorCount(dto.getElevatorCount())
+                .walkMetersToHsrZhubei(dto.getWalkMetersToHsrZhubei())
+                .nearestStationToHsrZhubei(dto.getNearestStationToHsrZhubei())
+                .walkMetersToFengyuan(dto.getWalkMetersToFengyuan())
+                .nearestStationToFengyuan(dto.getNearestStationToFengyuan())
+                .walkMetersToElementary(dto.getWalkMetersToElementary())
+                .nearestElementarySchool(dto.getNearestElementarySchool())
+                .walkMetersToJuniorHigh(dto.getWalkMetersToJuniorHigh())
+                .nearestJuniorHighSchool(dto.getNearestJuniorHighSchool())
                 .buildAreaPing(dto.getBuildAreaPing())
                 .indoorPing(dto.getIndoorPing())
                 .bedroomCount(dto.getBedroomCount())

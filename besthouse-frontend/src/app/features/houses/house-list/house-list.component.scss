@@ -85,6 +85,23 @@
 .num {
   text-align: right;
   white-space: nowrap;
+
+  small {
+    display: block;
+    font-size: 0.7rem;
+    color: #757575;
+    font-weight: normal;
+  }
+}
+
+.clickable-info {
+  text-decoration: underline dotted #999;
+  text-underline-offset: 3px;
+  cursor: pointer;
+
+  &:hover {
+    color: #1976d2;
+  }
 }
 
 .sortable {

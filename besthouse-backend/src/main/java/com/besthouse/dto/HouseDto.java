@@ -21,6 +21,26 @@ public class HouseDto {
     private Integer houseAgeYear;
     private Integer floor;
     private Integer totalFloor;
+    /** 每層戶數 */
+    private Integer unitsPerFloor;
+    /** 電梯數 */
+    private Integer elevatorCount;
+    /** 步行至最近站點公尺數（往竹北高鐵） */
+    private Integer walkMetersToHsrZhubei;
+    /** 對應的最近站名 */
+    private String nearestStationToHsrZhubei;
+    /** 步行至最近站點公尺數（往新竹火車站） */
+    private Integer walkMetersToFengyuan;
+    /** 對應的最近站名 */
+    private String nearestStationToFengyuan;
+    /** 步行至最近國小公尺數 */
+    private Integer walkMetersToElementary;
+    /** 最近國小校名 */
+    private String nearestElementarySchool;
+    /** 步行至最近國中公尺數 */
+    private Integer walkMetersToJuniorHigh;
+    /** 最近國中校名 */
+    private String nearestJuniorHighSchool;
     private BigDecimal buildAreaPing;
     private BigDecimal indoorPing;
     private Integer bedroomCount;

@@ -28,12 +28,16 @@
         <label>數值</label>
         <input type="number" formControlName="numValue" step="0.01" />
       </div>
-      <div class="form-group" *ngIf="!isNumType()">
+      <div class="form-group" *ngIf="!isNumType() && !isNoValueType()">
         <label>排除車位類型（多選以逗號分隔）</label>
         <select formControlName="strValue">
           <option *ngFor="let pt of parkingTypes" [value]="pt">{{ parkingLabels[pt] }}</option>
         </select>
         <span class="hint">目前只能單選；如需多個請新增多條規則</span>
+      </div>
+      <div class="form-group" *ngIf="isNoValueType()">
+        <label>說明</label>
+        <span class="hint">此規則無需設定值，啟用後會自動套用判斷邏輯</span>
       </div>
       <div class="form-group">
         <label>狀態</label>
@@ -69,6 +73,7 @@
         <td>
           <span *ngIf="rule.numValue != null">{{ rule.numValue }}</span>
           <span *ngIf="rule.strValue">{{ rule.strValue }}</span>
+          <span *ngIf="rule.numValue == null && !rule.strValue">—</span>
         </td>
         <td>
           <span class="badge" [class.badge--active]="rule.isActive" [class.badge--eliminated]="!rule.isActive">

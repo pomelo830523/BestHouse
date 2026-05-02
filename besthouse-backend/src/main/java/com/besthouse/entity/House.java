@@ -47,6 +47,46 @@ public class House {
     @Column(name = "TOTAL_FLOOR")
     private Integer totalFloor;
 
+    /** 每層戶數 */
+    @Column(name = "UNITS_PER_FLOOR")
+    private Integer unitsPerFloor;
+
+    /** 電梯數 */
+    @Column(name = "ELEVATOR_COUNT")
+    private Integer elevatorCount;
+
+    /** 步行至最近站點公尺數（往竹北高鐵方向，含轉乘起點） */
+    @Column(name = "WALK_METERS_TO_HSR_ZHUBEI")
+    private Integer walkMetersToHsrZhubei;
+
+    /** 對應 walkMetersToHsrZhubei 的最近站名，例：新莊火車站 */
+    @Column(name = "NEAREST_STATION_TO_HSR_ZHUBEI", length = 100)
+    private String nearestStationToHsrZhubei;
+
+    /** 步行至最近站點公尺數（往新竹火車站方向，含轉乘起點） */
+    @Column(name = "WALK_METERS_TO_FENGYUAN")
+    private Integer walkMetersToFengyuan;
+
+    /** 對應 walkMetersToFengyuan 的最近站名 */
+    @Column(name = "NEAREST_STATION_TO_FENGYUAN", length = 100)
+    private String nearestStationToFengyuan;
+
+    /** 步行至最近國小公尺數 */
+    @Column(name = "WALK_METERS_TO_ELEMENTARY")
+    private Integer walkMetersToElementary;
+
+    /** 最近國小校名 */
+    @Column(name = "NEAREST_ELEMENTARY_SCHOOL", length = 100)
+    private String nearestElementarySchool;
+
+    /** 步行至最近國中公尺數 */
+    @Column(name = "WALK_METERS_TO_JUNIOR_HIGH")
+    private Integer walkMetersToJuniorHigh;
+
+    /** 最近國中校名 */
+    @Column(name = "NEAREST_JUNIOR_HIGH_SCHOOL", length = 100)
+    private String nearestJuniorHighSchool;
+
     @Column(name = "BUILD_AREA_PING", precision = 10, scale = 2)
     private BigDecimal buildAreaPing;
 

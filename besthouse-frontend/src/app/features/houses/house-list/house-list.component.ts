@@ -7,17 +7,22 @@ import { House } from '../../../core/models/house.model';
 import { ColResizableDirective } from '../../../core/directives/col-resizable.directive';
 
 type SortableColumn =
+  | 'nickname' | 'address'
   | 'buildAreaPing' | 'indoorPing' | 'parkingPing' | 'commonAreaRatio'
   | 'totalPrice' | 'parkingPrice' | 'pricePerPingWithParking' | 'pricePerPingWithoutParking'
   | 'discountedTotalPrice' | 'discountedPricePerPingWithoutParking'
   | 'monthlyFee' | 'monthlyMortgage' | 'monthlyInterest' | 'interestToRentRatio'
-  | 'houseAgeYear' | 'floor'
+  | 'houseAgeYear' | 'floor' | 'unitsPerElevator'
+  | 'walkMetersToHsrZhubei' | 'walkMetersToFengyuan'
+  | 'walkMetersToElementary' | 'walkMetersToJuniorHigh'
   | 'originalRegistryDiff' | 'discountedRegistryDiff'
   | 'hasVisited' | 'visitIssue';
 
 type ColumnKey = SortableColumn | 'layout';
 
 const COLUMN_LABELS: Record<ColumnKey, string> = {
+  nickname: '代號',
+  address: '地址',
   buildAreaPing: '總坪',
   indoorPing: '室內坪',
   parkingPing: '車位坪',
@@ -34,6 +39,11 @@ const COLUMN_LABELS: Record<ColumnKey, string> = {
   interestToRentRatio: '息租比',
   houseAgeYear: '屋齡',
   floor: '樓層',
+  unitsPerElevator: '戶/梯',
+  walkMetersToHsrZhubei: '步行→高鐵',
+  walkMetersToFengyuan: '步行→火車站',
+  walkMetersToElementary: '步行→國小',
+  walkMetersToJuniorHigh: '步行→國中',
   layout: '格局',
   originalRegistryDiff: '開價 vs 實登',
   discountedRegistryDiff: '折扣後 vs 實登',
@@ -47,11 +57,15 @@ const TOGGLEABLE_COLUMNS: ColumnKey[] = [
   'discountedTotalPrice', 'discountedPricePerPingWithoutParking',
   'monthlyFee', 'monthlyMortgage', 'monthlyInterest', 'interestToRentRatio',
   'houseAgeYear', 'floor', 'layout',
+  'walkMetersToHsrZhubei', 'walkMetersToFengyuan',
+  'walkMetersToElementary', 'walkMetersToJuniorHigh',
   'originalRegistryDiff', 'discountedRegistryDiff',
-  'hasVisited', 'visitIssue',
+  'hasVisited', 'visitIssue', 'unitsPerElevator',
 ];
 
 const DEFAULT_VISIBLE: Record<ColumnKey, boolean> = {
+  nickname: true,
+  address: true,
   buildAreaPing: true,
   indoorPing: true,
   parkingPing: false,
@@ -68,6 +82,11 @@ const DEFAULT_VISIBLE: Record<ColumnKey, boolean> = {
   interestToRentRatio: false,
   houseAgeYear: true,
   floor: true,
+  unitsPerElevator: true,
+  walkMetersToHsrZhubei: true,
+  walkMetersToFengyuan: true,
+  walkMetersToElementary: true,
+  walkMetersToJuniorHigh: true,
   layout: true,
   originalRegistryDiff: true,
   discountedRegistryDiff: true,
@@ -97,6 +116,9 @@ export class HouseListComponent implements OnInit {
   readonly toggleableColumns = TOGGLEABLE_COLUMNS;
   readonly columnLabels = COLUMN_LABELS;
   columnVisible: Record<ColumnKey, boolean> = { ...DEFAULT_VISIBLE };
+
+  /** 點擊距離數字後展開站名/校名的 cell 集合（key = `${houseId}-${field}`） */
+  private expandedCells = new Set<string>();
 
   constructor(
     private houseService: HouseService,
@@ -217,8 +239,12 @@ export class HouseListComponent implements OnInit {
     return this.sortDirection === 'asc' ? '↑' : '↓';
   }
 
-  private sortValue(house: House, col: SortableColumn): number {
+  private sortValue(house: House, col: SortableColumn): number | string {
     switch (col) {
+      case 'nickname':
+        return house.nickname ?? '';
+      case 'address':
+        return house.address ?? '';
       case 'commonAreaRatio':
         return this.commonAreaRatio(house) ?? -Infinity;
       case 'discountedTotalPrice':
@@ -235,16 +261,46 @@ export class HouseListComponent implements OnInit {
         const issue = this.hasAnyVisitIssue(house);
         return issue === null ? -1 : issue ? 1 : 0;
       }
+      case 'unitsPerElevator':
+        return this.unitsPerElevator(house) ?? -Infinity;
       default:
         return (house as any)[col] ?? -Infinity;
     }
+  }
+
+  toggleCell(houseId: number, field: string): void {
+    const key = `${houseId}-${field}`;
+    if (this.expandedCells.has(key)) {
+      this.expandedCells.delete(key);
+    } else {
+      this.expandedCells.add(key);
+    }
+  }
+
+  isCellExpanded(houseId: number, field: string): boolean {
+    return this.expandedCells.has(`${houseId}-${field}`);
+  }
+
+  /** 戶/梯比 = 每層戶數 / 電梯數 */
+  unitsPerElevator(house: House): number | null {
+    if (!house.unitsPerFloor || !house.elevatorCount || house.elevatorCount <= 0) return null;
+    return +(house.unitsPerFloor / house.elevatorCount).toFixed(2);
   }
 
   private sortedHouses(list: House[]): House[] {
     if (!this.sortColumn) return list;
     const col = this.sortColumn;
     const dir = this.sortDirection === 'asc' ? 1 : -1;
-    return [...list].sort((a, b) => (this.sortValue(a, col) - this.sortValue(b, col)) * dir);
+    return [...list].sort((a, b) => {
+      const va = this.sortValue(a, col);
+      const vb = this.sortValue(b, col);
+      if (typeof va === 'string' && typeof vb === 'string') {
+        return va.localeCompare(vb, 'zh-TW') * dir;
+      }
+      const na = typeof va === 'number' ? va : -Infinity;
+      const nb = typeof vb === 'number' ? vb : -Infinity;
+      return (na - nb) * dir;
+    });
   }
 
   get activeHouses(): House[] {

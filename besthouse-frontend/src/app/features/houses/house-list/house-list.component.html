@@ -39,8 +39,12 @@
       <table class="table">
         <thead>
           <tr>
-            <th appColResizable>代號</th>
-            <th appColResizable>地址</th>
+            <th appColResizable class="sortable" (click)="sortBy('nickname')">
+              代號 <span class="sort-icon">{{ sortIcon('nickname') }}</span>
+            </th>
+            <th appColResizable class="sortable" (click)="sortBy('address')">
+              地址 <span class="sort-icon">{{ sortIcon('address') }}</span>
+            </th>
             <th appColResizable *ngIf="isVisible('buildAreaPing')" class="sortable" (click)="sortBy('buildAreaPing')">
               總坪 <span class="sort-icon">{{ sortIcon('buildAreaPing') }}</span>
             </th>
@@ -83,6 +87,22 @@
             <th appColResizable *ngIf="isVisible('floor')" class="sortable" (click)="sortBy('floor')">
               樓層 <span class="sort-icon">{{ sortIcon('floor') }}</span>
             </th>
+            <th appColResizable *ngIf="isVisible('walkMetersToHsrZhubei')" class="sortable" (click)="sortBy('walkMetersToHsrZhubei')"
+                title="步行至能轉乘竹北高鐵的最近站點公尺數">
+              高鐵 <span class="sort-icon">{{ sortIcon('walkMetersToHsrZhubei') }}</span>
+            </th>
+            <th appColResizable *ngIf="isVisible('walkMetersToFengyuan')" class="sortable" (click)="sortBy('walkMetersToFengyuan')"
+                title="步行至能轉乘新竹火車站的最近站點公尺數">
+              火車站 <span class="sort-icon">{{ sortIcon('walkMetersToFengyuan') }}</span>
+            </th>
+            <th appColResizable *ngIf="isVisible('walkMetersToElementary')" class="sortable" (click)="sortBy('walkMetersToElementary')"
+                title="步行至最近國小的公尺數">
+              國小 <span class="sort-icon">{{ sortIcon('walkMetersToElementary') }}</span>
+            </th>
+            <th appColResizable *ngIf="isVisible('walkMetersToJuniorHigh')" class="sortable" (click)="sortBy('walkMetersToJuniorHigh')"
+                title="步行至最近國中的公尺數">
+              國中 <span class="sort-icon">{{ sortIcon('walkMetersToJuniorHigh') }}</span>
+            </th>
             <th appColResizable *ngIf="isVisible('layout')">格局</th>
             <th appColResizable *ngIf="isVisible('originalRegistryDiff')" class="sortable" (click)="sortBy('originalRegistryDiff')">
               開價 vs 實登 <span class="sort-icon">{{ sortIcon('originalRegistryDiff') }}</span>
@@ -92,6 +112,10 @@
             </th>
             <th appColResizable *ngIf="isVisible('visitIssue')" class="sortable" (click)="sortBy('visitIssue')">
               看房問題 <span class="sort-icon">{{ sortIcon('visitIssue') }}</span>
+            </th>
+            <th appColResizable *ngIf="isVisible('unitsPerElevator')" class="sortable" (click)="sortBy('unitsPerElevator')"
+                title="戶/梯比 = 每層戶數 / 電梯數，數字越小代表越不需要等電梯（房屋網站通常無此資訊，需實地走訪確認）">
+              戶/梯 <span class="sort-icon">{{ sortIcon('unitsPerElevator') }}</span>
             </th>
             <th appColResizable *ngIf="isVisible('discountedTotalPrice')" class="sortable" (click)="sortBy('discountedTotalPrice')">
               折扣後總價 <span class="sort-icon">{{ sortIcon('discountedTotalPrice') }}</span>
@@ -155,6 +179,38 @@
             <td *ngIf="isVisible('floor')" class="num">
               {{ house.floor != null ? house.floor + 'F' : '-' }}
             </td>
+            <td *ngIf="isVisible('walkMetersToHsrZhubei')" class="num">
+              <ng-container *ngIf="house.walkMetersToHsrZhubei != null; else dashHsr">
+                <span [class.clickable-info]="house.nearestStationToHsrZhubei"
+                      (click)="house.nearestStationToHsrZhubei && toggleCell(house.houseId, 'hsr')">{{ house.walkMetersToHsrZhubei }}m</span>
+                <small *ngIf="isCellExpanded(house.houseId, 'hsr')">{{ house.nearestStationToHsrZhubei }}</small>
+              </ng-container>
+              <ng-template #dashHsr>-</ng-template>
+            </td>
+            <td *ngIf="isVisible('walkMetersToFengyuan')" class="num">
+              <ng-container *ngIf="house.walkMetersToFengyuan != null; else dashFy">
+                <span [class.clickable-info]="house.nearestStationToFengyuan"
+                      (click)="house.nearestStationToFengyuan && toggleCell(house.houseId, 'fy')">{{ house.walkMetersToFengyuan }}m</span>
+                <small *ngIf="isCellExpanded(house.houseId, 'fy')">{{ house.nearestStationToFengyuan }}</small>
+              </ng-container>
+              <ng-template #dashFy>-</ng-template>
+            </td>
+            <td *ngIf="isVisible('walkMetersToElementary')" class="num">
+              <ng-container *ngIf="house.walkMetersToElementary != null; else dashElem">
+                <span [class.clickable-info]="house.nearestElementarySchool"
+                      (click)="house.nearestElementarySchool && toggleCell(house.houseId, 'elem')">{{ house.walkMetersToElementary }}m</span>
+                <small *ngIf="isCellExpanded(house.houseId, 'elem')">{{ house.nearestElementarySchool }}</small>
+              </ng-container>
+              <ng-template #dashElem>-</ng-template>
+            </td>
+            <td *ngIf="isVisible('walkMetersToJuniorHigh')" class="num">
+              <ng-container *ngIf="house.walkMetersToJuniorHigh != null; else dashJh">
+                <span [class.clickable-info]="house.nearestJuniorHighSchool"
+                      (click)="house.nearestJuniorHighSchool && toggleCell(house.houseId, 'jh')">{{ house.walkMetersToJuniorHigh }}m</span>
+                <small *ngIf="isCellExpanded(house.houseId, 'jh')">{{ house.nearestJuniorHighSchool }}</small>
+              </ng-container>
+              <ng-template #dashJh>-</ng-template>
+            </td>
             <td *ngIf="isVisible('layout')" class="layout">
               {{ house.bedroomCount }}房{{ house.livingRoomCount }}廳{{ house.bathroomCount }}衛
             </td>
@@ -177,6 +233,12 @@
                 <span *ngSwitchCase="true" class="visit-issue--warn">⚠ 有問題</span>
                 <span *ngSwitchCase="false" class="visit-issue--ok">✓</span>
               </ng-container>
+            </td>
+            <td *ngIf="isVisible('unitsPerElevator')" class="num">
+              <ng-container *ngIf="unitsPerElevator(house) !== null; else noRatio">
+                {{ house.unitsPerFloor }}/{{ house.elevatorCount }}
+              </ng-container>
+              <ng-template #noRatio>-</ng-template>
             </td>
             <td *ngIf="isVisible('discountedTotalPrice')" class="num">
               <ng-container *ngIf="discountedTotalPrice(house) !== null; else noDiscount1">
@@ -216,8 +278,12 @@
       <table class="table">
         <thead>
           <tr>
-            <th appColResizable>代號</th>
-            <th appColResizable>地址</th>
+            <th appColResizable class="sortable" (click)="sortBy('nickname')">
+              代號 <span class="sort-icon">{{ sortIcon('nickname') }}</span>
+            </th>
+            <th appColResizable class="sortable" (click)="sortBy('address')">
+              地址 <span class="sort-icon">{{ sortIcon('address') }}</span>
+            </th>
             <th appColResizable class="sortable" (click)="sortBy('totalPrice')">
               總價 <span class="sort-icon">{{ sortIcon('totalPrice') }}</span>
             </th>
