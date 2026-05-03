@@ -36,7 +36,7 @@ public class ScoreService {
     public List<ScoreResultDto> calculateRanking() {
         List<House> activeHouses = houseRepository.findByStatusOrderByCreatedAtDesc(HouseStatus.ACTIVE);
         List<Member> members = memberRepository.findAllByOrderBySortOrderAsc();
-        List<RatingDimension> dimensions = dimensionRepository.findByIsActiveTrueOrderBySortOrderAsc();
+        List<RatingDimension> dimensions = dimensionRepository.findByIsActiveTrueOrderByWeightDescSortOrderAsc();
         List<HouseRating> allRatings = houseRatingRepository.findAllWithDetails();
 
         // key: houseId-memberId-dimensionId -> score

@@ -22,7 +22,8 @@ export class ColResizableDirective implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const th = this.el.nativeElement;
-    this.renderer.setStyle(th, 'position', 'relative');
+    // 不主動設 position；handle 是 absolute，要靠 th 自身的 CSS（如 sticky / relative）當定位 reference
+    // 若呼叫端的 th 沒有 positioned，請在 CSS 給 position: sticky 或 relative
 
     const handle = this.renderer.createElement('span') as HTMLElement;
     this.renderer.setStyle(handle, 'position', 'absolute');

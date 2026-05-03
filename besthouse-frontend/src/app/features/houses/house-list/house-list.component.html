@@ -179,35 +179,31 @@
             <td *ngIf="isVisible('floor')" class="num">
               {{ house.floor != null ? house.floor + 'F' : '-' }}
             </td>
-            <td *ngIf="isVisible('walkMetersToHsrZhubei')" class="num">
+            <td *ngIf="isVisible('walkMetersToHsrZhubei')" class="num num--left">
               <ng-container *ngIf="house.walkMetersToHsrZhubei != null; else dashHsr">
-                <span [class.clickable-info]="house.nearestStationToHsrZhubei"
-                      (click)="house.nearestStationToHsrZhubei && toggleCell(house.houseId, 'hsr')">{{ house.walkMetersToHsrZhubei }}m</span>
-                <small *ngIf="isCellExpanded(house.houseId, 'hsr')">{{ house.nearestStationToHsrZhubei }}</small>
+                {{ house.walkMetersToHsrZhubei }}m
+                <small *ngIf="house.nearestStationToHsrZhubei">{{ house.nearestStationToHsrZhubei }}</small>
               </ng-container>
               <ng-template #dashHsr>-</ng-template>
             </td>
-            <td *ngIf="isVisible('walkMetersToFengyuan')" class="num">
+            <td *ngIf="isVisible('walkMetersToFengyuan')" class="num num--left">
               <ng-container *ngIf="house.walkMetersToFengyuan != null; else dashFy">
-                <span [class.clickable-info]="house.nearestStationToFengyuan"
-                      (click)="house.nearestStationToFengyuan && toggleCell(house.houseId, 'fy')">{{ house.walkMetersToFengyuan }}m</span>
-                <small *ngIf="isCellExpanded(house.houseId, 'fy')">{{ house.nearestStationToFengyuan }}</small>
+                {{ house.walkMetersToFengyuan }}m
+                <small *ngIf="house.nearestStationToFengyuan">{{ house.nearestStationToFengyuan }}</small>
               </ng-container>
               <ng-template #dashFy>-</ng-template>
             </td>
-            <td *ngIf="isVisible('walkMetersToElementary')" class="num">
+            <td *ngIf="isVisible('walkMetersToElementary')" class="num num--left">
               <ng-container *ngIf="house.walkMetersToElementary != null; else dashElem">
-                <span [class.clickable-info]="house.nearestElementarySchool"
-                      (click)="house.nearestElementarySchool && toggleCell(house.houseId, 'elem')">{{ house.walkMetersToElementary }}m</span>
-                <small *ngIf="isCellExpanded(house.houseId, 'elem')">{{ house.nearestElementarySchool }}</small>
+                {{ house.walkMetersToElementary }}m
+                <small *ngIf="house.nearestElementarySchool">{{ house.nearestElementarySchool }}</small>
               </ng-container>
               <ng-template #dashElem>-</ng-template>
             </td>
-            <td *ngIf="isVisible('walkMetersToJuniorHigh')" class="num">
+            <td *ngIf="isVisible('walkMetersToJuniorHigh')" class="num num--left">
               <ng-container *ngIf="house.walkMetersToJuniorHigh != null; else dashJh">
-                <span [class.clickable-info]="house.nearestJuniorHighSchool"
-                      (click)="house.nearestJuniorHighSchool && toggleCell(house.houseId, 'jh')">{{ house.walkMetersToJuniorHigh }}m</span>
-                <small *ngIf="isCellExpanded(house.houseId, 'jh')">{{ house.nearestJuniorHighSchool }}</small>
+                {{ house.walkMetersToJuniorHigh }}m
+                <small *ngIf="house.nearestJuniorHighSchool">{{ house.nearestJuniorHighSchool }}</small>
               </ng-container>
               <ng-template #dashJh>-</ng-template>
             </td>

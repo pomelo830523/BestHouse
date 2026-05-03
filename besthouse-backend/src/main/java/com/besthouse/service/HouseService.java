@@ -318,10 +318,10 @@ public class HouseService {
         if (!hasParking || parkingPing == null || parkingPing.compareTo(BigDecimal.ZERO) == 0) {
             return null;
         }
-        // 車位價未填時，以 車位坪 × 20萬 估算
+        // 車位價未填時，以 車位坪 × 30萬 估算
         BigDecimal effectiveParkingPrice = (parkingPrice != null && parkingPrice.compareTo(BigDecimal.ZERO) > 0)
                 ? parkingPrice
-                : parkingPing.multiply(new BigDecimal("20"));
+                : parkingPing.multiply(new BigDecimal("30"));
         BigDecimal netPrice = totalPrice.subtract(effectiveParkingPrice);
         BigDecimal netArea  = buildAreaPing.subtract(parkingPing);
         if (netArea.compareTo(BigDecimal.ZERO) <= 0) {

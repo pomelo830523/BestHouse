@@ -20,7 +20,7 @@ public class RatingDimensionController {
 
     @GetMapping
     public ResponseEntity<List<RatingDimensionDto>> getAll() {
-        List<RatingDimensionDto> result = dimensionRepository.findByIsActiveTrueOrderBySortOrderAsc()
+        List<RatingDimensionDto> result = dimensionRepository.findByIsActiveTrueOrderByWeightDescSortOrderAsc()
                 .stream()
                 .map(d -> RatingDimensionDto.builder()
                         .dimensionId(d.getDimensionId())

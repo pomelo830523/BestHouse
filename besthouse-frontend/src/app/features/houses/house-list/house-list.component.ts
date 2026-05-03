@@ -109,16 +109,13 @@ export class HouseListComponent implements OnInit {
   isSyncing = false;
   errorMessage = '';
   successMessage = '';
-  sortColumn: SortableColumn | null = null;
+  sortColumn: SortableColumn | null = 'pricePerPingWithoutParking';
   sortDirection: 'asc' | 'desc' = 'asc';
   showColumnPanel = false;
 
   readonly toggleableColumns = TOGGLEABLE_COLUMNS;
   readonly columnLabels = COLUMN_LABELS;
   columnVisible: Record<ColumnKey, boolean> = { ...DEFAULT_VISIBLE };
-
-  /** 點擊距離數字後展開站名/校名的 cell 集合（key = `${houseId}-${field}`） */
-  private expandedCells = new Set<string>();
 
   constructor(
     private houseService: HouseService,
@@ -266,19 +263,6 @@ export class HouseListComponent implements OnInit {
       default:
         return (house as any)[col] ?? -Infinity;
     }
-  }
-
-  toggleCell(houseId: number, field: string): void {
-    const key = `${houseId}-${field}`;
-    if (this.expandedCells.has(key)) {
-      this.expandedCells.delete(key);
-    } else {
-      this.expandedCells.add(key);
-    }
-  }
-
-  isCellExpanded(houseId: number, field: string): boolean {
-    return this.expandedCells.has(`${houseId}-${field}`);
   }
 
   /** 戶/梯比 = 每層戶數 / 電梯數 */

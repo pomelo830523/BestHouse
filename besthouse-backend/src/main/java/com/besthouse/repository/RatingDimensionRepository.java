@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface RatingDimensionRepository extends JpaRepository<RatingDimension, Long> {
 
-    List<RatingDimension> findByIsActiveTrueOrderBySortOrderAsc();
+    List<RatingDimension> findByIsActiveTrueOrderByWeightDescSortOrderAsc();
 }

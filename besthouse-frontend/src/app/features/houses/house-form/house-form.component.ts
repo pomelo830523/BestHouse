@@ -196,9 +196,9 @@ export class HouseFormComponent implements OnInit {
     const hasParking = parkingType && parkingType !== 'NONE';
     const parkingPriceFilled: number = hasParking ? (+this.form.get('parkingPrice')?.value || 0) : 0;
     const parkingPing: number  = hasParking ? (+this.form.get('parkingPing')?.value  || 0) : 0;
-    // 車位價未填時，以 車位坪 × 20萬 估算
+    // 車位價未填時，以 車位坪 × 30萬 估算
     const parkingPrice: number = (hasParking && parkingPriceFilled === 0 && parkingPing > 0)
-      ? parkingPing * 20
+      ? parkingPing * 30
       : parkingPriceFilled;
     const discountPct: number  = +this.form.get('discountPercent')?.value || 0;
     const estimatedPrice: number = +this.form.get('estimatedRegistryPrice')?.value || 0;
