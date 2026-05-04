@@ -26,5 +26,7 @@ public enum FilterRuleType {
     /** 步行至最近國小公尺數上限 */
     MAX_WALK_METERS_TO_ELEMENTARY,
     /** 步行至最近國中公尺數上限 */
-    MAX_WALK_METERS_TO_JUNIOR_HIGH
+    MAX_WALK_METERS_TO_JUNIOR_HIGH,
+    /** 最高樓層上限（超過即淘汰） */
+    MAX_FLOOR
 }

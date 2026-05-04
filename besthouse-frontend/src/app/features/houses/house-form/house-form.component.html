@@ -226,9 +226,12 @@
         </select>
       </div>
       <div class="form-group">
-        <label>屋主折扣（%）</label>
-        <input type="number" formControlName="discountPercent" step="0.1" min="0" max="100"
-               placeholder="例：2.5 表示打 97.5 折" />
+        <label>屋主折扣後總價（萬）</label>
+        <input type="number" formControlName="discountedTotalPriceInput" step="1" min="0"
+               placeholder="例：2800（自動算折扣 %）" />
+        <span class="hint" *ngIf="displayedDiscountPercent !== null">
+          自動計算折扣：{{ displayedDiscountPercent }}%
+        </span>
       </div>
       <div class="form-group">
         <label>實價登錄估計總價（萬）</label>
@@ -364,7 +367,7 @@
 
     <!-- 折扣後計算 -->
     <div class="price-calc price-calc--discount" *ngIf="discountedTotalPrice !== null">
-      <div class="price-calc__header">折扣後（{{ form.get('discountPercent')?.value }}% off）</div>
+      <div class="price-calc__header">折扣後（{{ displayedDiscountPercent ?? 0 }}% off）</div>
       <div class="price-calc__items">
         <div class="price-calc__item">
           <span class="price-calc__label">折扣後總價</span>

@@ -123,6 +123,14 @@ public class FilterService {
                 }
                 yield null;
             }
+            case MAX_FLOOR -> {
+                if (house.getFloor() != null && rule.getNumValue() != null
+                        && house.getFloor() > rule.getNumValue().intValue()) {
+                    yield String.format("樓層 %d F 超過上限 %d F",
+                            house.getFloor(), rule.getNumValue().intValue());
+                }
+                yield null;
+            }
             case EXCLUDE_PARKING_TYPE -> {
                 if (house.getParkingType() != null && rule.getStrValue() != null) {
                     Set<String> excluded = Arrays.stream(rule.getStrValue().split(","))
@@ -256,8 +264,7 @@ public class FilterService {
             return null;
         }
         boolean hasParking = house.getParkingType() != null && house.getParkingType() != ParkingType.NONE;
-        BigDecimal effectiveParkingPrice = (hasParking && house.getParkingPrice() != null)
-                ? house.getParkingPrice() : BigDecimal.ZERO;
+        BigDecimal effectiveParkingPrice = house.getParkingPing().multiply(BigDecimal.valueOf(30));
         BigDecimal effectiveParkingPing  = (hasParking && house.getParkingPing()  != null)
                 ? house.getParkingPing()  : BigDecimal.ZERO;
         BigDecimal netPrice = house.getTotalPrice().subtract(effectiveParkingPrice);

@@ -322,12 +322,27 @@ export class HouseListComponent implements OnInit {
     return +(house.totalPrice * (1 - house.discountPercent / 100)).toFixed(1);
   }
 
-  /** 折扣後不含車位每坪（無折扣或無建坪時回 null） */
+  /**
+   * 折扣後不含車位每坪（無折扣或無建坪時回 null）。
+   * 邏輯需與 backend HouseService.calculatePricePerPingWithoutParking 一致：
+   * (折扣後總價 - 有效車位價) / (總坪 - 車位坪)；
+   * 車位價未填時用「車位坪 × 30 萬」估算。
+   */
   discountedPricePerPingWithoutParking(house: House): number | null {
     const discounted = this.discountedTotalPrice(house);
     if (discounted === null) return null;
     if (!house.buildAreaPing || house.buildAreaPing <= 0) return null;
-    return +((discounted - (house.parkingPrice ?? 0)) / house.buildAreaPing).toFixed(2);
+
+    const hasParking = !!house.parkingType && house.parkingType !== 'NONE';
+    const parkingPing = (hasParking && house.parkingPing) ? house.parkingPing : 0;
+    const parkingPriceFilled = (hasParking && house.parkingPrice) ? house.parkingPrice : 0;
+    const effectiveParkingPrice = parkingPriceFilled > 0
+      ? parkingPriceFilled
+      : parkingPing * 30;
+
+    const netArea = house.buildAreaPing - parkingPing;
+    if (netArea <= 0) return null;
+    return +((discounted - effectiveParkingPrice) / netArea).toFixed(2);
   }
 
   /**

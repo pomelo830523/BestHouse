@@ -11,7 +11,8 @@ export type FilterRuleType =
   | 'MAX_WALK_METERS_TO_HSR_ZHUBEI'
   | 'MAX_WALK_METERS_TO_FENGYUAN'
   | 'MAX_WALK_METERS_TO_ELEMENTARY'
-  | 'MAX_WALK_METERS_TO_JUNIOR_HIGH';
+  | 'MAX_WALK_METERS_TO_JUNIOR_HIGH'
+  | 'MAX_FLOOR';
 
 export const FILTER_RULE_TYPE_LABELS: Record<FilterRuleType, string> = {
   MAX_TOTAL_PRICE: '總價上限（萬）',
@@ -27,6 +28,7 @@ export const FILTER_RULE_TYPE_LABELS: Record<FilterRuleType, string> = {
   MAX_WALK_METERS_TO_FENGYUAN: '步行至新竹火車站公尺數上限',
   MAX_WALK_METERS_TO_ELEMENTARY: '步行至最近國小公尺數上限',
   MAX_WALK_METERS_TO_JUNIOR_HIGH: '步行至最近國中公尺數上限',
+  MAX_FLOOR: '最高樓層',
 };
 
 export interface FilterRule {

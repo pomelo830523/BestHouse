@@ -96,7 +96,8 @@ export class HouseFormComponent implements OnInit {
       bathroomCount: [null],
       totalPrice: [null, [Validators.required, Validators.min(1)]],
       hasVisited: [false],
-      discountPercent: [null],
+      // UI input：實際存的是 discountPercent，這裡讓使用者直接填折扣後總價
+      discountedTotalPriceInput: [null],
       estimatedRegistryPrice: [null],
       parkingType: ['NONE'],
       parkingPrice: [0],
@@ -154,7 +155,10 @@ export class HouseFormComponent implements OnInit {
           bathroomCount: house.bathroomCount,
           totalPrice: house.totalPrice,
           hasVisited: house.hasVisited,
-          discountPercent: house.discountPercent,
+          // 反算「折扣後總價」當作 UI 輸入值（後端仍存 discountPercent）
+          discountedTotalPriceInput: (house.discountPercent != null && house.discountPercent > 0 && house.totalPrice)
+            ? +(house.totalPrice * (1 - house.discountPercent / 100)).toFixed(2)
+            : null,
           estimatedRegistryPrice: house.estimatedRegistryPrice,
           parkingType: house.parkingType,
           parkingPrice: house.parkingPrice,
@@ -200,7 +204,11 @@ export class HouseFormComponent implements OnInit {
     const parkingPrice: number = (hasParking && parkingPriceFilled === 0 && parkingPing > 0)
       ? parkingPing * 30
       : parkingPriceFilled;
-    const discountPct: number  = +this.form.get('discountPercent')?.value || 0;
+    // 從「折扣後總價」反算折扣百分比；若無或不合法則 0
+    const discTotalInput: number = +this.form.get('discountedTotalPriceInput')?.value || 0;
+    const discountPct: number = (totalPrice > 0 && discTotalInput > 0 && discTotalInput < totalPrice)
+      ? ((totalPrice - discTotalInput) / totalPrice) * 100
+      : 0;
     const estimatedPrice: number = +this.form.get('estimatedRegistryPrice')?.value || 0;
 
     const monthlyRent: number = +this.form.get('monthlyRent')?.value || 0;
@@ -278,6 +286,21 @@ export class HouseFormComponent implements OnInit {
     if (pct > 0) return 'diff--higher';
     if (pct < 0) return 'diff--lower';
     return '';
+  }
+
+  /** 從 totalPrice + 使用者輸入的折扣後總價，反算 discountPercent 送 API；不合法時回 undefined */
+  private calcDiscountPercentForApi(totalPrice: number | null, discTotal: number | null): number | undefined {
+    if (!totalPrice || totalPrice <= 0) return undefined;
+    if (!discTotal || discTotal <= 0 || discTotal >= totalPrice) return undefined;
+    return +(((totalPrice - discTotal) / totalPrice) * 100).toFixed(2);
+  }
+
+  /** UI 顯示用：折扣 X.XX%；不合法回 null */
+  get displayedDiscountPercent(): number | null {
+    const total: number = +this.form?.get('totalPrice')?.value || 0;
+    const discTotal: number = +this.form?.get('discountedTotalPriceInput')?.value || 0;
+    if (total <= 0 || discTotal <= 0 || discTotal >= total) return null;
+    return +(((total - discTotal) / total) * 100).toFixed(2);
   }
 
   /** 戶/梯比 = 每層戶數 / 電梯數，僅當兩者都 > 0 時計算 */
@@ -369,7 +392,8 @@ export class HouseFormComponent implements OnInit {
       listingUrl: raw.listingUrl || undefined,
       note: raw.note || undefined,
       hasVisited: raw.hasVisited ?? false,
-      discountPercent: raw.discountPercent ?? undefined,
+      // 反算 discountPercent 送 API（後端 schema 不變）
+      discountPercent: this.calcDiscountPercentForApi(raw.totalPrice, raw.discountedTotalPriceInput),
       estimatedRegistryPrice: raw.estimatedRegistryPrice ?? undefined,
       hasMoldOrLeak: this.fromBoolStr(raw.hasMoldOrLeak),
       isFloorLevelOk: this.fromBoolStr(raw.isFloorLevelOk),
