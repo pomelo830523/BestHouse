@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HouseService } from '../../../core/services/house.service';
-import { RealPriceService } from '../../../core/services/real-price.service';
 import { House } from '../../../core/models/house.model';
 import { ColResizableDirective } from '../../../core/directives/col-resizable.directive';
 
@@ -15,10 +14,10 @@ type SortableColumn =
   | 'houseAgeYear' | 'floor' | 'unitsPerElevator'
   | 'walkMetersToHsrZhubei' | 'walkMetersToFengyuan'
   | 'walkMetersToElementary' | 'walkMetersToJuniorHigh'
-  | 'originalRegistryDiff' | 'discountedRegistryDiff'
+  | 'registryPricePerPingMin' | 'registryPricePerPingMax' | 'latestRegistryPricePerPing'
   | 'hasVisited' | 'visitIssue';
 
-type ColumnKey = SortableColumn | 'layout';
+type ColumnKey = SortableColumn | 'layout' | 'registryPricePerPingRange';
 
 const COLUMN_LABELS: Record<ColumnKey, string> = {
   nickname: '代號',
@@ -45,8 +44,10 @@ const COLUMN_LABELS: Record<ColumnKey, string> = {
   walkMetersToElementary: '步行→國小',
   walkMetersToJuniorHigh: '步行→國中',
   layout: '格局',
-  originalRegistryDiff: '開價 vs 實登',
-  discountedRegistryDiff: '折扣後 vs 實登',
+  registryPricePerPingMin: '實登每坪下限',
+  registryPricePerPingMax: '實登每坪上限',
+  registryPricePerPingRange: '實登每坪範圍',
+  latestRegistryPricePerPing: '最新實登每坪',
   hasVisited: '看房',
   visitIssue: '看房問題',
 };
@@ -59,7 +60,7 @@ const TOGGLEABLE_COLUMNS: ColumnKey[] = [
   'houseAgeYear', 'floor', 'layout',
   'walkMetersToHsrZhubei', 'walkMetersToFengyuan',
   'walkMetersToElementary', 'walkMetersToJuniorHigh',
-  'originalRegistryDiff', 'discountedRegistryDiff',
+  'registryPricePerPingRange', 'latestRegistryPricePerPing',
   'hasVisited', 'visitIssue', 'unitsPerElevator',
 ];
 
@@ -88,8 +89,10 @@ const DEFAULT_VISIBLE: Record<ColumnKey, boolean> = {
   walkMetersToElementary: true,
   walkMetersToJuniorHigh: true,
   layout: true,
-  originalRegistryDiff: true,
-  discountedRegistryDiff: true,
+  registryPricePerPingMin: false,
+  registryPricePerPingMax: false,
+  registryPricePerPingRange: true,
+  latestRegistryPricePerPing: true,
   hasVisited: true,
   visitIssue: true,
 };
@@ -106,7 +109,6 @@ const STORAGE_KEY = 'besthouse-column-visibility';
 export class HouseListComponent implements OnInit {
   houses: House[] = [];
   isLoading = false;
-  isSyncing = false;
   errorMessage = '';
   successMessage = '';
   sortColumn: SortableColumn | null = 'pricePerPingWithoutParking';
@@ -119,7 +121,6 @@ export class HouseListComponent implements OnInit {
 
   constructor(
     private houseService: HouseService,
-    private realPriceService: RealPriceService,
   ) {}
 
   ngOnInit(): void {
@@ -191,22 +192,6 @@ export class HouseListComponent implements OnInit {
     });
   }
 
-  syncRealPrice(): void {
-    if (!confirm('將下載新竹縣 + 新竹市的實價登錄資料（約需 10~30 秒），確定開始？')) return;
-    this.isSyncing = true;
-    this.errorMessage = '';
-    this.realPriceService.syncAll().subscribe({
-      next: (result) => {
-        this.successMessage = `實價登錄同步完成，共 ${result.total} 筆（新竹縣 ${result.counts['J'] ?? 0} 筆、新竹市 ${result.counts['O'] ?? 0} 筆）`;
-        this.isSyncing = false;
-      },
-      error: () => {
-        this.errorMessage = '同步失敗，請確認網路連線';
-        this.isSyncing = false;
-      },
-    });
-  }
-
   applyFilters(): void {
     this.isLoading = true;
     this.houseService.applyFilters().subscribe({
@@ -248,10 +233,12 @@ export class HouseListComponent implements OnInit {
         return this.discountedTotalPrice(house) ?? -Infinity;
       case 'discountedPricePerPingWithoutParking':
         return this.discountedPricePerPingWithoutParking(house) ?? -Infinity;
-      case 'originalRegistryDiff':
-        return this.originalRegistryDiffPct(house) ?? -Infinity;
-      case 'discountedRegistryDiff':
-        return this.discountedRegistryDiffPct(house) ?? -Infinity;
+      case 'registryPricePerPingMin':
+        return house.registryPricePerPingMin ?? -Infinity;
+      case 'registryPricePerPingMax':
+        return house.registryPricePerPingMax ?? -Infinity;
+      case 'latestRegistryPricePerPing':
+        return house.latestRegistryPricePerPing ?? -Infinity;
       case 'hasVisited':
         return house.hasVisited ? 1 : 0;
       case 'visitIssue': {
@@ -302,18 +289,14 @@ export class HouseListComponent implements OnInit {
     return +((house.buildAreaPing - house.indoorPing - parkingPing) / house.buildAreaPing * 100).toFixed(1);
   }
 
-  /** 開價 vs 實價登錄 */
-  originalRegistryDiffPct(house: House): number | null {
-    if (!house.estimatedRegistryPrice || house.estimatedRegistryPrice <= 0) return null;
-    return +((house.totalPrice - house.estimatedRegistryPrice) / house.estimatedRegistryPrice * 100).toFixed(1);
-  }
-
-  /** 折扣後 vs 實價登錄（無折扣時回 null） */
-  discountedRegistryDiffPct(house: House): number | null {
-    if (!house.estimatedRegistryPrice || house.estimatedRegistryPrice <= 0) return null;
-    if (!house.discountPercent || house.discountPercent <= 0) return null;
-    const discounted = house.totalPrice * (1 - house.discountPercent / 100);
-    return +((discounted - house.estimatedRegistryPrice) / house.estimatedRegistryPrice * 100).toFixed(1);
+  /** 顯示用：實登每坪範圍字串，例 "60~70"；兩端皆無時回 null */
+  registryPricePerPingRange(house: House): string | null {
+    const min = house.registryPricePerPingMin;
+    const max = house.registryPricePerPingMax;
+    if (min == null && max == null) return null;
+    if (min != null && max != null) return `${min}~${max}`;
+    if (min != null) return `≥ ${min}`;
+    return `≤ ${max}`;
   }
 
   /** 折扣後總價（無折扣時回 null） */
@@ -370,11 +353,5 @@ export class HouseListComponent implements OnInit {
 
   mapsUrl(address: string): string {
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
-  }
-
-  diffClass(pct: number): string {
-    if (pct > 0) return 'diff--higher';
-    if (pct < 0) return 'diff--lower';
-    return '';
   }
 }

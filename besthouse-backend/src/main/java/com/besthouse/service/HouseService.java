@@ -89,7 +89,9 @@ public class HouseService {
         house.setNote(dto.getNote());
         house.setHasVisited(dto.getHasVisited() != null ? dto.getHasVisited() : false);
         house.setDiscountPercent(dto.getDiscountPercent());
-        house.setEstimatedRegistryPrice(dto.getEstimatedRegistryPrice());
+        house.setRegistryPricePerPingMin(dto.getRegistryPricePerPingMin());
+        house.setRegistryPricePerPingMax(dto.getRegistryPricePerPingMax());
+        house.setLatestRegistryPricePerPing(dto.getLatestRegistryPricePerPing());
         house.setHasMoldOrLeak(dto.getHasMoldOrLeak());
         house.setIsFloorLevelOk(dto.getIsFloorLevelOk());
         house.setIsDoorWindowOk(dto.getIsDoorWindowOk());
@@ -180,7 +182,9 @@ public class HouseService {
                 .note(house.getNote())
                 .hasVisited(house.getHasVisited())
                 .discountPercent(house.getDiscountPercent())
-                .estimatedRegistryPrice(house.getEstimatedRegistryPrice())
+                .registryPricePerPingMin(house.getRegistryPricePerPingMin())
+                .registryPricePerPingMax(house.getRegistryPricePerPingMax())
+                .latestRegistryPricePerPing(house.getLatestRegistryPricePerPing())
                 .status(house.getStatus())
                 .eliminatedReason(house.getEliminatedReason())
                 .pricePerPingWithParking(priceWithParking)
@@ -241,7 +245,9 @@ public class HouseService {
                 .note(dto.getNote())
                 .hasVisited(dto.getHasVisited() != null ? dto.getHasVisited() : false)
                 .discountPercent(dto.getDiscountPercent())
-                .estimatedRegistryPrice(dto.getEstimatedRegistryPrice())
+                .registryPricePerPingMin(dto.getRegistryPricePerPingMin())
+                .registryPricePerPingMax(dto.getRegistryPricePerPingMax())
+                .latestRegistryPricePerPing(dto.getLatestRegistryPricePerPing())
                 .hasMoldOrLeak(dto.getHasMoldOrLeak())
                 .isFloorLevelOk(dto.getIsFloorLevelOk())
                 .isDoorWindowOk(dto.getIsDoorWindowOk())

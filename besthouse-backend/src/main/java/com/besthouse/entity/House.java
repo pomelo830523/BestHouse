@@ -134,8 +134,17 @@ public class House {
     @Column(name = "DISCOUNT_PERCENT", precision = 5, scale = 2)
     private BigDecimal discountPercent;
 
-    @Column(name = "ESTIMATED_REGISTRY_PRICE", precision = 12, scale = 2)
-    private BigDecimal estimatedRegistryPrice;
+    /** 過去一年實登不含車位每坪下限（萬/坪，使用者手填） */
+    @Column(name = "REGISTRY_PRICE_PER_PING_MIN", precision = 10, scale = 2)
+    private BigDecimal registryPricePerPingMin;
+
+    /** 過去一年實登不含車位每坪上限（萬/坪，使用者手填） */
+    @Column(name = "REGISTRY_PRICE_PER_PING_MAX", precision = 10, scale = 2)
+    private BigDecimal registryPricePerPingMax;
+
+    /** 最新一筆實登不含車位每坪（萬/坪，使用者手填） */
+    @Column(name = "LATEST_REGISTRY_PRICE_PER_PING", precision = 10, scale = 2)
+    private BigDecimal latestRegistryPricePerPing;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS", nullable = false, columnDefinition = "VARCHAR(20)")

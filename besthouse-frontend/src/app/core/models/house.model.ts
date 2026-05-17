@@ -56,7 +56,12 @@ export interface House {
   note: string;
   hasVisited: boolean;
   discountPercent: number | null;
-  estimatedRegistryPrice: number | null;
+  /** 過去一年實登不含車位每坪下限（萬/坪，使用者手填） */
+  registryPricePerPingMin: number | null;
+  /** 過去一年實登不含車位每坪上限（萬/坪，使用者手填） */
+  registryPricePerPingMax: number | null;
+  /** 最新一筆實登不含車位每坪（萬/坪，使用者手填） */
+  latestRegistryPricePerPing: number | null;
   status: HouseStatus;
   eliminatedReason: string;
   pricePerPingWithParking: number;
@@ -117,5 +122,7 @@ export interface HouseCreateRequest {
   listingUrl?: string;
   hasVisited?: boolean;
   discountPercent?: number | null;
-  estimatedRegistryPrice?: number | null;
+  registryPricePerPingMin?: number | null;
+  registryPricePerPingMax?: number | null;
+  latestRegistryPricePerPing?: number | null;
 }

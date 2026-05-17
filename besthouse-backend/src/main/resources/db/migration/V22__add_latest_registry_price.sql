@@ -1,0 +1,3 @@
+-- 新增「最新實登不含車位每坪」欄位（萬/坪，使用者手填，不自動計算）
+ALTER TABLE HOUSE
+    ADD COLUMN LATEST_REGISTRY_PRICE_PER_PING DECIMAL(10, 2) NULL COMMENT '最新一筆實登不含車位每坪（萬/坪，使用者手填）' AFTER REGISTRY_PRICE_PER_PING_MAX;

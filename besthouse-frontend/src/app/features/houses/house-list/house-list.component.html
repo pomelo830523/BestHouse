@@ -4,9 +4,6 @@
     <button class="btn btn--outline btn--sm" (click)="showColumnPanel = !showColumnPanel">
       欄位設定 {{ showColumnPanel ? '▲' : '▼' }}
     </button>
-    <button class="btn btn--outline btn--sm" (click)="syncRealPrice()" [disabled]="isSyncing">
-      {{ isSyncing ? '同步中...' : '同步實價登錄' }}
-    </button>
     <button class="btn btn--warn btn--sm" (click)="applyFilters()" [disabled]="isLoading">
       套用篩選條件
     </button>
@@ -104,8 +101,13 @@
               國中 <span class="sort-icon">{{ sortIcon('walkMetersToJuniorHigh') }}</span>
             </th>
             <th appColResizable *ngIf="isVisible('layout')">格局</th>
-            <th appColResizable *ngIf="isVisible('originalRegistryDiff')" class="sortable" (click)="sortBy('originalRegistryDiff')">
-              開價 vs 實登 <span class="sort-icon">{{ sortIcon('originalRegistryDiff') }}</span>
+            <th appColResizable *ngIf="isVisible('registryPricePerPingRange')"
+                title="過去一年實價登錄不含車位每坪範圍（萬/坪，使用者手填）">
+              實登每坪範圍
+            </th>
+            <th appColResizable *ngIf="isVisible('latestRegistryPricePerPing')" class="sortable" (click)="sortBy('latestRegistryPricePerPing')"
+                title="最新一筆實登不含車位每坪（萬/坪，使用者手填）">
+              最新實登每坪 <span class="sort-icon">{{ sortIcon('latestRegistryPricePerPing') }}</span>
             </th>
             <th appColResizable *ngIf="isVisible('hasVisited')" class="sortable" (click)="sortBy('hasVisited')">
               看房 <span class="sort-icon">{{ sortIcon('hasVisited') }}</span>
@@ -122,9 +124,6 @@
             </th>
             <th appColResizable *ngIf="isVisible('discountedPricePerPingWithoutParking')" class="sortable" (click)="sortBy('discountedPricePerPingWithoutParking')">
               折扣後不含車位每坪 <span class="sort-icon">{{ sortIcon('discountedPricePerPingWithoutParking') }}</span>
-            </th>
-            <th appColResizable *ngIf="isVisible('discountedRegistryDiff')" class="sortable" (click)="sortBy('discountedRegistryDiff')">
-              折扣後 vs 實登 <span class="sort-icon">{{ sortIcon('discountedRegistryDiff') }}</span>
             </th>
             <th appColResizable>操作</th>
           </tr>
@@ -210,13 +209,11 @@
             <td *ngIf="isVisible('layout')" class="layout">
               {{ house.bedroomCount }}房{{ house.livingRoomCount }}廳{{ house.bathroomCount }}衛
             </td>
-            <td *ngIf="isVisible('originalRegistryDiff')" class="num">
-              <ng-container *ngIf="originalRegistryDiffPct(house) !== null; else noRegistry1">
-                <span [ngClass]="diffClass(originalRegistryDiffPct(house)!)">
-                  {{ originalRegistryDiffPct(house)! > 0 ? '+' : '' }}{{ originalRegistryDiffPct(house) }}%
-                </span>
-              </ng-container>
-              <ng-template #noRegistry1>-</ng-template>
+            <td *ngIf="isVisible('registryPricePerPingRange')" class="num">
+              {{ registryPricePerPingRange(house) ?? '-' }}
+            </td>
+            <td *ngIf="isVisible('latestRegistryPricePerPing')" class="num">
+              {{ house.latestRegistryPricePerPing != null ? (house.latestRegistryPricePerPing | number:'1.2-2') : '-' }}
             </td>
             <td *ngIf="isVisible('hasVisited')" class="visited-cell">
               <span class="visited-badge" [class.visited]="house.hasVisited">
@@ -247,14 +244,6 @@
                 {{ discountedPricePerPingWithoutParking(house)! | number:'1.2-2' }}
               </ng-container>
               <ng-template #noDiscount2>-</ng-template>
-            </td>
-            <td *ngIf="isVisible('discountedRegistryDiff')" class="num">
-              <ng-container *ngIf="discountedRegistryDiffPct(house) !== null; else noRegistry2">
-                <span [ngClass]="diffClass(discountedRegistryDiffPct(house)!)">
-                  {{ discountedRegistryDiffPct(house)! > 0 ? '+' : '' }}{{ discountedRegistryDiffPct(house) }}%
-                </span>
-              </ng-container>
-              <ng-template #noRegistry2>-</ng-template>
             </td>
             <td class="row-actions">
               <a class="btn btn--outline btn--sm" [routerLink]="['/houses', house.houseId, 'rate']">評分</a>

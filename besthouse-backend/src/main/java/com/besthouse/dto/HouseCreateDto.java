@@ -86,7 +86,14 @@ public class HouseCreateDto {
 
     private BigDecimal discountPercent;
 
-    private BigDecimal estimatedRegistryPrice;
+    /** 過去一年實登不含車位每坪下限（萬/坪，使用者手填） */
+    private BigDecimal registryPricePerPingMin;
+
+    /** 過去一年實登不含車位每坪上限（萬/坪，使用者手填） */
+    private BigDecimal registryPricePerPingMax;
+
+    /** 最新一筆實登不含車位每坪（萬/坪，使用者手填） */
+    private BigDecimal latestRegistryPricePerPing;
 
     // 看房評估欄位
     private Boolean hasMoldOrLeak;

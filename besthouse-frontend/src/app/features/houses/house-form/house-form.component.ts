@@ -3,9 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HouseService } from '../../../core/services/house.service';
-import { RealPriceService } from '../../../core/services/real-price.service';
 import { FloodRisk, FLOOD_RISK_LABELS, ParkingType, PARKING_TYPE_LABELS } from '../../../core/models/house.model';
-import { RealPriceMatch } from '../../../core/models/real-price.model';
 
 @Component({
   selector: 'app-house-form',
@@ -30,30 +28,27 @@ export class HouseFormComponent implements OnInit {
   discountedPricePerPingWithParking: number | null = null;
   discountedPricePerPingWithoutParking: number | null = null;
 
-  // 實價登錄比較
-  registryVsOriginalDiffPct: number | null = null;
-  registryVsDiscountedDiffPct: number | null = null;
-
   // 租買比較
   monthlyMortgage: number | null = null;
   monthlyInterest: number | null = null;
   interestToRentRatio: number | null = null;
+
+  // 實登「不含車位每坪」由使用者輸入的「總價」自動計算（套用同公式）
+  registryPricePerPingMinCalc: number | null = null;
+  registryPricePerPingMaxCalc: number | null = null;
+  latestRegistryPricePerPingCalc: number | null = null;
+  registryPricePerPingMinHint = '';
+  registryPricePerPingMaxHint = '';
+  latestRegistryPricePerPingHint = '';
 
   readonly parkingTypes: ParkingType[] = ['NONE', 'FLAT', 'RAMP_FLAT', 'MECHANICAL', 'RAMP_MECHANICAL'];
   readonly parkingLabels = PARKING_TYPE_LABELS;
   readonly floodRisks: FloodRisk[] = ['LOW', 'MEDIUM', 'HIGH'];
   readonly floodRiskLabels = FLOOD_RISK_LABELS;
 
-  // 實價登錄查詢
-  realPriceMatches: RealPriceMatch[] = [];
-  isLoadingMatches = false;
-  matchError = '';
-  showFormula = false;
-
   constructor(
     private fb: FormBuilder,
     private houseService: HouseService,
-    private realPriceService: RealPriceService,
     private router: Router,
     private route: ActivatedRoute,
   ) {}
@@ -98,7 +93,10 @@ export class HouseFormComponent implements OnInit {
       hasVisited: [false],
       // UI input：實際存的是 discountPercent，這裡讓使用者直接填折扣後總價
       discountedTotalPriceInput: [null],
-      estimatedRegistryPrice: [null],
+      // UI input：使用者填「實登總價（萬）」，submit 時換算成 per-ping 存進後端
+      registryTotalPriceMinInput: [null],
+      registryTotalPriceMaxInput: [null],
+      latestRegistryTotalPriceInput: [null],
       parkingType: ['NONE'],
       parkingPrice: [0],
       parkingPing: [null],
@@ -130,6 +128,19 @@ export class HouseFormComponent implements OnInit {
   private loadHouse(id: number): void {
     this.houseService.getById(id).subscribe({
       next: (house) => {
+        // 用 house 物件本身的數值（不依賴 form），反算「實登總價」UI 輸入
+        const hasParking = !!house.parkingType && house.parkingType !== 'NONE';
+        const parkingPriceFilled = hasParking ? (house.parkingPrice || 0) : 0;
+        const parkingPing = hasParking ? (house.parkingPing || 0) : 0;
+        const parkingPriceEff = (hasParking && parkingPriceFilled === 0 && parkingPing > 0)
+          ? parkingPing * 30
+          : parkingPriceFilled;
+        const netArea = (house.buildAreaPing || 0) - parkingPing;
+        const totalFromPerPing = (perPing: number | null): number | null => {
+          if (!perPing || perPing <= 0 || netArea <= 0) return null;
+          return +(perPing * netArea + parkingPriceEff).toFixed(2);
+        };
+
         this.form.patchValue({
           nickname: house.nickname,
           address: house.address,
@@ -159,7 +170,9 @@ export class HouseFormComponent implements OnInit {
           discountedTotalPriceInput: (house.discountPercent != null && house.discountPercent > 0 && house.totalPrice)
             ? +(house.totalPrice * (1 - house.discountPercent / 100)).toFixed(2)
             : null,
-          estimatedRegistryPrice: house.estimatedRegistryPrice,
+          registryTotalPriceMinInput: totalFromPerPing(house.registryPricePerPingMin),
+          registryTotalPriceMaxInput: totalFromPerPing(house.registryPricePerPingMax),
+          latestRegistryTotalPriceInput: totalFromPerPing(house.latestRegistryPricePerPing),
           parkingType: house.parkingType,
           parkingPrice: house.parkingPrice,
           parkingPing: house.parkingPing,
@@ -209,7 +222,6 @@ export class HouseFormComponent implements OnInit {
     const discountPct: number = (totalPrice > 0 && discTotalInput > 0 && discTotalInput < totalPrice)
       ? ((totalPrice - discTotalInput) / totalPrice) * 100
       : 0;
-    const estimatedPrice: number = +this.form.get('estimatedRegistryPrice')?.value || 0;
 
     const monthlyRent: number = +this.form.get('monthlyRent')?.value || 0;
 
@@ -255,37 +267,53 @@ export class HouseFormComponent implements OnInit {
       this.interestToRentRatio = (this.monthlyInterest !== null && monthlyRent > 0)
         ? +((this.monthlyInterest / monthlyRent * 100).toFixed(2))
         : null;
-
-      // 實價登錄比較
-      if (estimatedPrice > 0) {
-        this.registryVsOriginalDiffPct = +((totalPrice - estimatedPrice) / estimatedPrice * 100).toFixed(2);
-        if (discounted !== null && discounted > 0) {
-          this.registryVsDiscountedDiffPct = +((discounted - estimatedPrice) / estimatedPrice * 100).toFixed(2);
-        } else {
-          this.registryVsDiscountedDiffPct = null;
-        }
-      } else {
-        this.registryVsOriginalDiffPct = null;
-        this.registryVsDiscountedDiffPct = null;
-      }
     } else {
       this.pricePerPingWithParking = null;
       this.pricePerPingWithoutParking = null;
       this.discountedTotalPrice = null;
       this.discountedPricePerPingWithParking = null;
       this.discountedPricePerPingWithoutParking = null;
-      this.registryVsOriginalDiffPct = null;
-      this.registryVsDiscountedDiffPct = null;
       this.monthlyMortgage = null;
       this.monthlyInterest = null;
       this.interestToRentRatio = null;
     }
+
+    // 實登「不含車位每坪」由「實登總價」輸入自動換算
+    const netArea = buildAreaPing - parkingPing;
+    this.updateRegistryPerPing('registryTotalPriceMinInput', netArea, parkingPrice, 'min');
+    this.updateRegistryPerPing('registryTotalPriceMaxInput', netArea, parkingPrice, 'max');
+    this.updateRegistryPerPing('latestRegistryTotalPriceInput', netArea, parkingPrice, 'latest');
   }
 
-  diffClass(pct: number): string {
-    if (pct > 0) return 'diff--higher';
-    if (pct < 0) return 'diff--lower';
-    return '';
+  /** 從實登總價輸入算出「不含車位每坪」並寫入對應 component state */
+  private updateRegistryPerPing(
+    inputField: string,
+    netArea: number,
+    parkingPrice: number,
+    target: 'min' | 'max' | 'latest',
+  ): void {
+    const totalInput: number = +this.form.get(inputField)?.value || 0;
+    let calc: number | null = null;
+    let hint = '';
+    if (totalInput > 0) {
+      if (netArea <= 0) {
+        hint = '⚠️ 請先填總坪、車位坪後才能計算';
+      } else if (totalInput <= parkingPrice) {
+        hint = '⚠️ 總價需大於車位價';
+      } else {
+        calc = +((totalInput - parkingPrice) / netArea).toFixed(2);
+      }
+    }
+    if (target === 'min') {
+      this.registryPricePerPingMinCalc = calc;
+      this.registryPricePerPingMinHint = hint;
+    } else if (target === 'max') {
+      this.registryPricePerPingMaxCalc = calc;
+      this.registryPricePerPingMaxHint = hint;
+    } else {
+      this.latestRegistryPricePerPingCalc = calc;
+      this.latestRegistryPricePerPingHint = hint;
+    }
   }
 
   /** 從 totalPrice + 使用者輸入的折扣後總價，反算 discountPercent 送 API；不合法時回 undefined */
@@ -351,6 +379,29 @@ export class HouseFormComponent implements OnInit {
     return this.form?.get(name)?.value ?? '';
   }
 
+  /**
+   * 樂居網實價登錄查詢 URL（新竹市東區、過去一年、總坪 ±3）。
+   * buildAreaPing 未填或 ≤ 0 時回 null（hide link）。
+   */
+  get lejuPriceListUrl(): string | null {
+    const ping: number = +this.form?.get('buildAreaPing')?.value || 0;
+    if (ping <= 0) return null;
+    const minPing = Math.max(0, Math.round(ping - 3));
+    const maxPing = Math.round(ping + 3);
+    const fiveYearAgo = new Date();
+    fiveYearAgo.setFullYear(fiveYearAgo.getFullYear() - 5);
+    const dateStart = `${fiveYearAgo.getFullYear()}-${String(fiveYearAgo.getMonth() + 1).padStart(2, '0')}-${String(fiveYearAgo.getDate()).padStart(2, '0')}`;
+    const params = new URLSearchParams({
+      area: 'O390',
+      bType: '0',
+      special: '0',
+      dateStart,
+      tPing: `${minPing}_${maxPing}`,
+      houseAge: '-1_999',
+    });
+    return `https://www.leju.com.tw/price_list/${encodeURIComponent('新竹市')}?${params.toString()}`;
+  }
+
   submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -394,7 +445,9 @@ export class HouseFormComponent implements OnInit {
       hasVisited: raw.hasVisited ?? false,
       // 反算 discountPercent 送 API（後端 schema 不變）
       discountPercent: this.calcDiscountPercentForApi(raw.totalPrice, raw.discountedTotalPriceInput),
-      estimatedRegistryPrice: raw.estimatedRegistryPrice ?? undefined,
+      registryPricePerPingMin: this.registryPricePerPingMinCalc ?? undefined,
+      registryPricePerPingMax: this.registryPricePerPingMaxCalc ?? undefined,
+      latestRegistryPricePerPing: this.latestRegistryPricePerPingCalc ?? undefined,
       hasMoldOrLeak: this.fromBoolStr(raw.hasMoldOrLeak),
       isFloorLevelOk: this.fromBoolStr(raw.isFloorLevelOk),
       isDoorWindowOk: this.fromBoolStr(raw.isDoorWindowOk),
@@ -427,29 +480,6 @@ export class HouseFormComponent implements OnInit {
         this.isSubmitting = false;
       },
     });
-  }
-
-  queryRealPrice(): void {
-    if (!this.houseId) return;
-    this.isLoadingMatches = true;
-    this.matchError = '';
-    this.realPriceMatches = [];
-    this.realPriceService.getMatches(this.houseId).subscribe({
-      next: (matches) => {
-        this.realPriceMatches = matches;
-        this.isLoadingMatches = false;
-        if (matches.length === 0) this.matchError = '找不到相近的實價登錄紀錄（請確認地址是否填寫，或先同步實價登錄資料）';
-      },
-      error: () => {
-        this.matchError = '查詢失敗';
-        this.isLoadingMatches = false;
-      },
-    });
-  }
-
-  applyRealPrice(match: RealPriceMatch): void {
-    this.form.patchValue({ estimatedRegistryPrice: match.totalPriceWan });
-    this.realPriceMatches = [];
   }
 
   cancel(): void {
