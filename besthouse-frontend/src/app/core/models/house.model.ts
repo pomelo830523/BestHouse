@@ -44,6 +44,8 @@ export interface House {
   parkingType: ParkingType;
   parkingPrice: number;
   parkingPing: number;
+  /** 有無機車位 */
+  hasMotorcycleParking: boolean | null;
   monthlyFee: number;
   monthlyRent: number | null;
   /** 每月貸款利息（元，後端計算） */
@@ -116,6 +118,7 @@ export interface HouseCreateRequest {
   parkingType?: ParkingType;
   parkingPrice?: number;
   parkingPing?: number;
+  hasMotorcycleParking?: boolean | null;
   monthlyFee?: number;
   monthlyRent?: number | null;
   note?: string;

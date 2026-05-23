@@ -119,6 +119,9 @@
                 title="戶/梯比 = 每層戶數 / 電梯數，數字越小代表越不需要等電梯（房屋網站通常無此資訊，需實地走訪確認）">
               戶/梯 <span class="sort-icon">{{ sortIcon('unitsPerElevator') }}</span>
             </th>
+            <th appColResizable *ngIf="isVisible('hasMotorcycleParking')" class="sortable" (click)="sortBy('hasMotorcycleParking')">
+              機車位 <span class="sort-icon">{{ sortIcon('hasMotorcycleParking') }}</span>
+            </th>
             <th appColResizable *ngIf="isVisible('discountedTotalPrice')" class="sortable" (click)="sortBy('discountedTotalPrice')">
               折扣後總價 <span class="sort-icon">{{ sortIcon('discountedTotalPrice') }}</span>
             </th>
@@ -232,6 +235,13 @@
                 {{ house.unitsPerFloor }}/{{ house.elevatorCount }}
               </ng-container>
               <ng-template #noRatio>-</ng-template>
+            </td>
+            <td *ngIf="isVisible('hasMotorcycleParking')" class="visited-cell">
+              <ng-container [ngSwitch]="house.hasMotorcycleParking">
+                <span *ngSwitchCase="true" class="visit-issue--ok">有</span>
+                <span *ngSwitchCase="false" class="visit-issue--warn">無</span>
+                <span *ngSwitchDefault class="visit-issue--none">-</span>
+              </ng-container>
             </td>
             <td *ngIf="isVisible('discountedTotalPrice')" class="num">
               <ng-container *ngIf="discountedTotalPrice(house) !== null; else noDiscount1">

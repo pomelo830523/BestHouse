@@ -50,6 +50,8 @@ public class HouseDto {
     private ParkingType parkingType;
     private BigDecimal parkingPrice;
     private BigDecimal parkingPing;
+    /** 有無機車位 */
+    private Boolean hasMotorcycleParking;
     private BigDecimal monthlyFee;
     private BigDecimal monthlyRent;
     /** 每月房貸月付（元，貸款8成 年利率2.6% 本息平均攤還30年，自動計算） */

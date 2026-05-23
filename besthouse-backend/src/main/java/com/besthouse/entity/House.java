@@ -115,6 +115,10 @@ public class House {
     @Column(name = "PARKING_PING", precision = 10, scale = 2)
     private BigDecimal parkingPing;
 
+    /** 有無機車位 */
+    @Column(name = "HAS_MOTORCYCLE_PARKING")
+    private Boolean hasMotorcycleParking;
+
     @Column(name = "MONTHLY_FEE", precision = 10, scale = 2)
     private BigDecimal monthlyFee;
 

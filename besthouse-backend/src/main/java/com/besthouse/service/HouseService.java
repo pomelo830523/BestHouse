@@ -83,6 +83,7 @@ public class HouseService {
         house.setParkingType(dto.getParkingType());
         house.setParkingPrice(dto.getParkingPrice());
         house.setParkingPing(dto.getParkingPing());
+        house.setHasMotorcycleParking(dto.getHasMotorcycleParking());
         house.setMonthlyFee(dto.getMonthlyFee());
         house.setMonthlyRent(dto.getMonthlyRent());
         house.setListingUrl(dto.getListingUrl());
@@ -173,6 +174,7 @@ public class HouseService {
                 .parkingType(house.getParkingType())
                 .parkingPrice(house.getParkingPrice())
                 .parkingPing(house.getParkingPing())
+                .hasMotorcycleParking(house.getHasMotorcycleParking())
                 .monthlyFee(house.getMonthlyFee())
                 .monthlyRent(house.getMonthlyRent())
                 .monthlyMortgage(monthlyMortgage)
@@ -239,6 +241,7 @@ public class HouseService {
                 .parkingType(dto.getParkingType())
                 .parkingPrice(dto.getParkingPrice() != null ? dto.getParkingPrice() : BigDecimal.ZERO)
                 .parkingPing(dto.getParkingPing())
+                .hasMotorcycleParking(dto.getHasMotorcycleParking())
                 .monthlyFee(dto.getMonthlyFee())
                 .monthlyRent(dto.getMonthlyRent())
                 .listingUrl(dto.getListingUrl())

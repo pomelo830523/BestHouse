@@ -75,6 +75,9 @@ public class HouseCreateDto {
 
     private BigDecimal parkingPing;
 
+    /** 有無機車位 */
+    private Boolean hasMotorcycleParking;
+
     private BigDecimal monthlyFee;
 
     private BigDecimal monthlyRent;

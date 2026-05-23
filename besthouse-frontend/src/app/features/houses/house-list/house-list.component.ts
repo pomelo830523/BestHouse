@@ -15,7 +15,7 @@ type SortableColumn =
   | 'walkMetersToHsrZhubei' | 'walkMetersToFengyuan'
   | 'walkMetersToElementary' | 'walkMetersToJuniorHigh'
   | 'registryPricePerPingMin' | 'registryPricePerPingMax' | 'latestRegistryPricePerPing'
-  | 'hasVisited' | 'visitIssue';
+  | 'hasVisited' | 'visitIssue' | 'hasMotorcycleParking';
 
 type ColumnKey = SortableColumn | 'layout' | 'registryPricePerPingRange';
 
@@ -50,6 +50,7 @@ const COLUMN_LABELS: Record<ColumnKey, string> = {
   latestRegistryPricePerPing: '最新實登每坪',
   hasVisited: '看房',
   visitIssue: '看房問題',
+  hasMotorcycleParking: '機車位',
 };
 
 const TOGGLEABLE_COLUMNS: ColumnKey[] = [
@@ -61,7 +62,7 @@ const TOGGLEABLE_COLUMNS: ColumnKey[] = [
   'walkMetersToHsrZhubei', 'walkMetersToFengyuan',
   'walkMetersToElementary', 'walkMetersToJuniorHigh',
   'registryPricePerPingRange', 'latestRegistryPricePerPing',
-  'hasVisited', 'visitIssue', 'unitsPerElevator',
+  'hasVisited', 'visitIssue', 'unitsPerElevator', 'hasMotorcycleParking',
 ];
 
 const DEFAULT_VISIBLE: Record<ColumnKey, boolean> = {
@@ -95,6 +96,7 @@ const DEFAULT_VISIBLE: Record<ColumnKey, boolean> = {
   latestRegistryPricePerPing: true,
   hasVisited: true,
   visitIssue: true,
+  hasMotorcycleParking: true,
 };
 
 const STORAGE_KEY = 'besthouse-column-visibility';
@@ -245,6 +247,10 @@ export class HouseListComponent implements OnInit {
         const issue = this.hasAnyVisitIssue(house);
         return issue === null ? -1 : issue ? 1 : 0;
       }
+      case 'hasMotorcycleParking':
+        return house.hasMotorcycleParking === null || house.hasMotorcycleParking === undefined
+          ? -1
+          : house.hasMotorcycleParking ? 1 : 0;
       case 'unitsPerElevator':
         return this.unitsPerElevator(house) ?? -Infinity;
       default:
