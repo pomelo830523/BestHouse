@@ -158,6 +158,10 @@ public class House {
     @Column(name = "ELIMINATED_REASON", columnDefinition = "TEXT")
     private String eliminatedReason;
 
+    /** 可修缮缺陷觸發的警告訊息（status 仍維持 ACTIVE） */
+    @Column(name = "WARNING_REASON", columnDefinition = "TEXT")
+    private String warningReason;
+
     // 看房評估欄位
     @Column(name = "HAS_MOLD_OR_LEAK")
     private Boolean hasMoldOrLeak;

@@ -226,6 +226,15 @@
   white-space: nowrap;
 }
 
+.warn-badge {
+  display: inline-block;
+  margin-left: 4px;
+  color: #e65100;
+  font-weight: 700;
+  cursor: help;
+  user-select: none;
+}
+
 .visit-issue--ok {
   color: #2e7d32;
   font-weight: 600;

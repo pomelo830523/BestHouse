@@ -72,6 +72,8 @@ public class HouseDto {
     private BigDecimal latestRegistryPricePerPing;
     private HouseStatus status;
     private String eliminatedReason;
+    /** 可修缮缺陷觸發的警告訊息（status 仍 ACTIVE） */
+    private String warningReason;
     /** 含車位每坪售價（自動計算） */
     private BigDecimal pricePerPingWithParking;
     /** 不含車位每坪售價（自動計算） */

@@ -17,8 +17,12 @@ public enum FilterRuleType {
     MIN_PARKING_PING,
     /** 戶/梯比上限（每部電梯服務戶數，= 每層戶數 / 電梯數） */
     MAX_HOUSEHOLD_PER_ELEVATOR_RATIO,
-    /** 已看房且發現任何看房問題即淘汰（不需數值） */
+    /** 已看房且發現任何看房問題即淘汰（舊規則，保留作向下相容，新增請用拆分後的版本） */
     EXCLUDE_VISIT_ISSUES,
+    /** 致命缺陷（凶宅/海砂/輻射/違建/嫌惡設施/淹水高風險）→ 直接淘汰 */
+    EXCLUDE_FATAL_VISIT_ISSUES,
+    /** 可修缮缺陷（發霉漏水/地板/門窗/水壓/車位最低層/管委會NG）→ 標記警告但不淘汰 */
+    WARN_REPAIRABLE_VISIT_ISSUES,
     /** 步行至竹北高鐵最近站點公尺數上限 */
     MAX_WALK_METERS_TO_HSR_ZHUBEI,
     /** 步行至新竹火車站最近站點公尺數上限 */

@@ -189,6 +189,7 @@ public class HouseService {
                 .latestRegistryPricePerPing(house.getLatestRegistryPricePerPing())
                 .status(house.getStatus())
                 .eliminatedReason(house.getEliminatedReason())
+                .warningReason(house.getWarningReason())
                 .pricePerPingWithParking(priceWithParking)
                 .pricePerPingWithoutParking(priceWithoutParking)
                 .createdAt(house.getCreatedAt())

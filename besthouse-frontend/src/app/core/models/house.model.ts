@@ -66,6 +66,8 @@ export interface House {
   latestRegistryPricePerPing: number | null;
   status: HouseStatus;
   eliminatedReason: string;
+  /** 可修缮缺陷觸發的警告訊息（status 仍 ACTIVE） */
+  warningReason: string | null;
   pricePerPingWithParking: number;
   pricePerPingWithoutParking: number;
   createdAt: string;

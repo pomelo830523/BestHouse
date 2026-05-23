@@ -139,6 +139,9 @@
                 {{ house.nickname }} ↗
               </a>
               <ng-template #plainNickname>{{ house.nickname }}</ng-template>
+              <span *ngIf="house.warningReason"
+                    class="warn-badge"
+                    [title]="house.warningReason">⚠️</span>
             </td>
             <td class="address">
               <a *ngIf="house.address; else noAddress"
