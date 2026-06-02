@@ -9,7 +9,7 @@ type SortableColumn =
   | 'nickname' | 'address'
   | 'buildAreaPing' | 'indoorPing' | 'parkingPing' | 'commonAreaRatio'
   | 'totalPrice' | 'parkingPrice' | 'pricePerPingWithParking' | 'pricePerPingWithoutParking'
-  | 'discountedTotalPrice' | 'discountedPricePerPingWithoutParking'
+  | 'discountedTotalPrice' | 'discountedPricePerPingWithoutParking' | 'priceDropFromPeakPercent'
   | 'monthlyFee' | 'monthlyMortgage' | 'monthlyInterest' | 'interestToRentRatio'
   | 'houseAgeYear' | 'floor' | 'unitsPerElevator'
   | 'walkMetersToHsrZhubei' | 'walkMetersToFengyuan'
@@ -32,6 +32,7 @@ const COLUMN_LABELS: Record<ColumnKey, string> = {
   pricePerPingWithoutParking: '不含車位單價',
   discountedTotalPrice: '折扣後總價',
   discountedPricePerPingWithoutParking: '折扣後不含車位每坪',
+  priceDropFromPeakPercent: '距高點跌幅',
   monthlyFee: '管理費',
   monthlyMortgage: '月付房貸',
   monthlyInterest: '月付利息',
@@ -56,7 +57,7 @@ const COLUMN_LABELS: Record<ColumnKey, string> = {
 const TOGGLEABLE_COLUMNS: ColumnKey[] = [
   'buildAreaPing', 'indoorPing', 'parkingPing', 'commonAreaRatio',
   'totalPrice', 'parkingPrice', 'pricePerPingWithParking', 'pricePerPingWithoutParking',
-  'discountedTotalPrice', 'discountedPricePerPingWithoutParking',
+  'discountedTotalPrice', 'discountedPricePerPingWithoutParking', 'priceDropFromPeakPercent',
   'monthlyFee', 'monthlyMortgage', 'monthlyInterest', 'interestToRentRatio',
   'houseAgeYear', 'floor', 'layout',
   'walkMetersToHsrZhubei', 'walkMetersToFengyuan',
@@ -78,6 +79,7 @@ const DEFAULT_VISIBLE: Record<ColumnKey, boolean> = {
   pricePerPingWithoutParking: true,
   discountedTotalPrice: true,
   discountedPricePerPingWithoutParking: true,
+  priceDropFromPeakPercent: true,
   monthlyFee: true,
   monthlyMortgage: false,
   monthlyInterest: false,
@@ -235,6 +237,8 @@ export class HouseListComponent implements OnInit {
         return this.discountedTotalPrice(house) ?? -Infinity;
       case 'discountedPricePerPingWithoutParking':
         return this.discountedPricePerPingWithoutParking(house) ?? -Infinity;
+      case 'priceDropFromPeakPercent':
+        return this.priceDropFromPeakPercent(house) ?? -Infinity;
       case 'registryPricePerPingMin':
         return house.registryPricePerPingMin ?? -Infinity;
       case 'registryPricePerPingMax':
@@ -332,6 +336,18 @@ export class HouseListComponent implements OnInit {
     const netArea = house.buildAreaPing - parkingPing;
     if (netArea <= 0) return null;
     return +((discounted - effectiveParkingPrice) / netArea).toFixed(2);
+  }
+
+  /**
+   * 折扣後不含車位每坪較「實登上限不含車位每坪」（歷史高點）下降的百分比。
+   * 公式：(實登上限 - 折扣後不含車位每坪) / 實登上限 × 100；
+   * 正值代表現價低於歷史高點。無實登上限或無折扣後每坪（未填屋主折讓）時回 null。
+   */
+  priceDropFromPeakPercent(house: House): number | null {
+    const peak = house.registryPricePerPingMax;
+    const current = this.discountedPricePerPingWithoutParking(house);
+    if (peak == null || peak <= 0 || current === null) return null;
+    return +((peak - current) / peak * 100).toFixed(1);
   }
 
   /**

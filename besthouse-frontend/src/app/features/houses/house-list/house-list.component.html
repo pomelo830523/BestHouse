@@ -128,6 +128,10 @@
             <th appColResizable *ngIf="isVisible('discountedPricePerPingWithoutParking')" class="sortable" (click)="sortBy('discountedPricePerPingWithoutParking')">
               折扣後不含車位每坪 <span class="sort-icon">{{ sortIcon('discountedPricePerPingWithoutParking') }}</span>
             </th>
+            <th appColResizable *ngIf="isVisible('priceDropFromPeakPercent')" class="sortable" (click)="sortBy('priceDropFromPeakPercent')"
+                title="折扣後不含車位每坪較實登上限（歷史高點）下降的百分比；正值＝低於高點">
+              距高點跌幅 <span class="sort-icon">{{ sortIcon('priceDropFromPeakPercent') }}</span>
+            </th>
             <th appColResizable>操作</th>
           </tr>
         </thead>
@@ -257,6 +261,12 @@
                 {{ discountedPricePerPingWithoutParking(house)! | number:'1.2-2' }}
               </ng-container>
               <ng-template #noDiscount2>-</ng-template>
+            </td>
+            <td *ngIf="isVisible('priceDropFromPeakPercent')" class="num">
+              <ng-container *ngIf="priceDropFromPeakPercent(house) !== null; else noDrop">
+                {{ priceDropFromPeakPercent(house)! | number:'1.1-1' }}%
+              </ng-container>
+              <ng-template #noDrop>-</ng-template>
             </td>
             <td class="row-actions">
               <a class="btn btn--outline btn--sm" [routerLink]="['/houses', house.houseId, 'rate']">評分</a>

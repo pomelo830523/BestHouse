@@ -28,7 +28,8 @@ export class FilterRulesComponent implements OnInit {
     'MAX_HOUSEHOLD_PER_ELEVATOR_RATIO',
     'MAX_WALK_METERS_TO_HSR_ZHUBEI', 'MAX_WALK_METERS_TO_FENGYUAN',
     'MAX_WALK_METERS_TO_ELEMENTARY', 'MAX_WALK_METERS_TO_JUNIOR_HIGH',
-    'EXCLUDE_VISIT_ISSUES',
+    'EXCLUDE_FATAL_VISIT_ISSUES',
+    'WARN_REPAIRABLE_VISIT_ISSUES',
   ];
   readonly ruleTypeLabels = FILTER_RULE_TYPE_LABELS;
   readonly parkingTypes: ParkingType[] = ['NONE', 'FLAT', 'RAMP_FLAT', 'MECHANICAL', 'RAMP_MECHANICAL'];
@@ -45,6 +46,8 @@ export class FilterRulesComponent implements OnInit {
   // 不需要任何值的規則類型（只靠啟用/停用控制）
   readonly noValueTypes: FilterRuleType[] = [
     'EXCLUDE_VISIT_ISSUES',
+    'EXCLUDE_FATAL_VISIT_ISSUES',
+    'WARN_REPAIRABLE_VISIT_ISSUES',
   ];
 
   constructor(
