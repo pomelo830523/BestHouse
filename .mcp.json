@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "besthouse-kb": {
+      "type": "stdio",
+      "command": "C:\\Java_workspace\\BestHouse\\besthouse-kb\\.venv\\Scripts\\python.exe",
+      "args": [
+        "C:\\Java_workspace\\BestHouse\\besthouse-kb\\kb_server.py"
+      ],
+      "env": {
+        "PYTHONUTF8": "1"
+      }
+    }
+  }
+}
